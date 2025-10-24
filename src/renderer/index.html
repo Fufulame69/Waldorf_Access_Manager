@@ -522,7 +522,7 @@
     <!-- New Sidebar based on sketch -->
     <nav class="sidebar">
       <div class="sidebar-header">
-        <img src="../assets/waldorf_logo.png" alt="Waldorf Astoria" style="max-width: 100%; height: auto; margin-bottom: 10px;">
+        <img src="../../assets/waldorf_logo.png" alt="Waldorf Astoria" style="max-width: 100%; height: auto; margin-bottom: 10px;">
         <h2>Hotel Access Manager</h2>
       </div>
       <div class="sidebar-nav">
@@ -639,37 +639,59 @@
       await saveData();
     }
 
-    // File Storage
+    // Cloudflare Worker Storage
+    const WORKER_URL = 'https://waldorf-access-manager.waldstoriafere.workers.dev/api/data';
+
     async function saveData() {
       try {
-        const result = await window.electronAPI.saveData(data);
+        const response = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        
+        const result = await response.json();
         if (result.success) {
           showSaveIndicator();
         } else {
           console.error('Failed to save data:', result.error);
-          await window.electronAPI.showAlertDialog('Failed to save data: ' + result.error);
+          alert('Failed to save data: ' + (result.error || 'Unknown error'));
         }
       } catch (error) {
         console.error('Error saving data:', error);
-        await window.electronAPI.showAlertDialog('Error saving data: ' + error.message);
+        alert('Error saving data: ' + error.message);
       }
     }
 
     async function loadData() {
       try {
-        const loadedData = await window.electronAPI.loadData();
-        if (loadedData) {
-          data = loadedData;
-          // Check if data needs initialization
-          if (data.departments.length === 0 && data.categories.length === 0) {
+        const response = await fetch(WORKER_URL, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const loadedData = await response.json();
+          if (loadedData) {
+            data = loadedData;
+            // Check if data needs initialization
+            if (data.departments.length === 0 && data.categories.length === 0) {
+              await initializeData();
+            }
+          } else {
             await initializeData();
           }
         } else {
+          console.error('Failed to load data:', response.statusText);
           await initializeData();
         }
       } catch (error) {
         console.error('Error loading data:', error);
-        await window.electronAPI.showAlertDialog('Error loading data: ' + error.message);
+        alert('Error loading data: ' + error.message);
         await initializeData();
       }
     }

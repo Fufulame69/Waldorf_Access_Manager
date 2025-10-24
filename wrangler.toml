@@ -1,0 +1,7 @@
+name = "waldorf-access-manager"
+main = "src/index.js"
+compatibility_date = "2023-12-01"
+
+[[kv_namespaces]]
+binding = "WALDORF_ACCESS_DATA"
+id = "52e933751b9d4685965dbab04c2cb031"
