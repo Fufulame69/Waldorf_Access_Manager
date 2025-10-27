@@ -522,7 +522,7 @@
     <!-- New Sidebar based on sketch -->
     <nav class="sidebar">
       <div class="sidebar-header">
-        <img src="../../assets/waldorf_logo.png" alt="Waldorf Astoria" style="max-width: 100%; height: auto; margin-bottom: 10px;">
+        <img src="../assets/waldorf_logo.png" alt="Waldorf Astoria" style="max-width: 100%; height: auto; margin-bottom: 10px;">
         <h2>Hotel Access Manager</h2>
       </div>
       <div class="sidebar-nav">
@@ -590,44 +590,20 @@
     let currentDepartment = null;
     let currentPosition = null;
 
-    // Initialize with sample data
-    async function initializeData() {
-      if (data.departments.length === 0) {
-        data.departments = [
-          { id: 1, name: 'Gerencia', positions: [] },
-          { id: 2, name: 'Finanzas', positions: [] },
-          { id: 3, name: 'Habitaciones', positions: [] },
-          { id: 4, name: 'Food & Beverage', positions: [] },
-          { id: 5, name: 'Recursos Humanos', positions: [] }
-        ];
-
-        data.categories = [
-          { id: 1, name: 'OnQ' },
-          { id: 2, name: 'Opera PMS' },
-          { id: 3, name: 'Simphony' },
-          { id: 4, name: 'Finanzas' },
-          { id: 5, name: 'Recursos Humanos' }
-        ];
-
-        data.systems = [
-          { id: 1, name: 'OnQ User', categoryId: 1 },
-          { id: 2, name: 'eMail', categoryId: 1 },
-          { id: 3, name: 'OnQ Admin', categoryId: 1 },
-          { id: 4, name: 'Finance Manager', categoryId: 2 },
-          { id: 5, name: 'Security', categoryId: 2 },
-          { id: 6, name: 'POS Server', categoryId: 3 },
-          { id: 7, name: 'POS Bartender', categoryId: 3 },
-          { id: 8, name: 'Blackline', categoryId: 4 },
-          { id: 9, name: 'PROPLAN', categoryId: 4 },
-          { id: 10, name: 'NOMINA', categoryId: 5 }
-        ];
-        
-        // Ensure accessMatrix exists
-        if (!data.accessMatrix) {
-          data.accessMatrix = {};
+    // Load data from local JSON file
+    async function loadData() {
+      try {
+        const response = await fetch('./data.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        data = await response.json();
         
-        // Ensure metadata exists
+        // Ensure all required properties exist
+        if (!data.departments) data.departments = [];
+        if (!data.systems) data.systems = [];
+        if (!data.categories) data.categories = [];
+        if (!data.accessMatrix) data.accessMatrix = {};
         if (!data.metadata) {
           data.metadata = {
             version: "1.0.0",
@@ -635,64 +611,40 @@
             description: "Hotel Access Matrix Management Data"
           };
         }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        // Initialize with empty data if file cannot be loaded
+        data = {
+          metadata: {
+            version: "1.0.0",
+            lastModified: new Date().toISOString(),
+            description: "Hotel Access Matrix Management Data"
+          },
+          departments: [],
+          systems: [],
+          categories: [],
+          accessMatrix: {}
+        };
       }
-      await saveData();
     }
 
-    // Cloudflare Worker Storage
-    const WORKER_URL = 'https://waldorf-access-manager.waldstoriafere.workers.dev/api/data';
-
+    // Save data to local JSON file (using download for now)
     async function saveData() {
       try {
-        const response = await fetch(WORKER_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+        // Update the last modified timestamp
+        data.metadata.lastModified = new Date().toISOString();
         
-        const result = await response.json();
-        if (result.success) {
-          showSaveIndicator();
-        } else {
-          console.error('Failed to save data:', result.error);
-          alert('Failed to save data: ' + (result.error || 'Unknown error'));
-        }
+        // In a browser environment, we can't directly write to files
+        // For now, we'll just show the save indicator and log the data
+        console.log('Data saved:', data);
+        showSaveIndicator();
+        
+        // In a real application, you might want to implement a different
+        // saving mechanism like localStorage or a backend API
+        localStorage.setItem('waldorf_access_data', JSON.stringify(data));
       } catch (error) {
         console.error('Error saving data:', error);
         alert('Error saving data: ' + error.message);
-      }
-    }
-
-    async function loadData() {
-      try {
-        const response = await fetch(WORKER_URL, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (response.ok) {
-          const loadedData = await response.json();
-          if (loadedData) {
-            data = loadedData;
-            // Check if data needs initialization
-            if (data.departments.length === 0 && data.categories.length === 0) {
-              await initializeData();
-            }
-          } else {
-            await initializeData();
-          }
-        } else {
-          console.error('Failed to load data:', response.statusText);
-          await initializeData();
-        }
-      } catch (error) {
-        console.error('Error loading data:', error);
-        alert('Error loading data: ' + error.message);
-        await initializeData();
       }
     }
 
@@ -1095,7 +1047,7 @@
       const dept = data.departments.find(d => d.id === id);
       if (!dept) return;
       
-      const confirmed = await window.electronAPI.showConfirmDialog(
+      const confirmed = confirm(
         `Are you sure you want to delete the department "${dept.name}"? This will also delete all positions in this department and their access permissions.`
       );
       
@@ -1163,7 +1115,7 @@
       const pos = currentDepartment.positions.find(p => p.id === id);
       if (!pos) return;
       
-      const confirmed = await window.electronAPI.showConfirmDialog(
+      const confirmed = confirm(
         `Are you sure you want to delete the position "${pos.name}"? This will also delete all access permissions for this position.`
       );
       
@@ -1223,7 +1175,7 @@ async function editCategory(id) {
     async function deleteCategory(id) {
       const systems = data.systems.filter(s => s.categoryId === id);
       if (systems.length > 0) {
-        await window.electronAPI.showAlertDialog(
+        alert(
           'Cannot delete category with systems. Please delete or reassign all systems first.'
         );
         return;
@@ -1232,7 +1184,7 @@ async function editCategory(id) {
       const cat = data.categories.find(c => c.id === id);
       if (!cat) return;
       
-      const confirmed = await window.electronAPI.showConfirmDialog(
+      const confirmed = confirm(
         `Are you sure you want to delete the category "${cat.name}"?`
       );
       
@@ -1294,7 +1246,7 @@ async function editCategory(id) {
       const sys = data.systems.find(s => s.id === id);
       if (!sys) return;
       
-      const confirmed = await window.electronAPI.showConfirmDialog(
+      const confirmed = confirm(
         `Are you sure you want to delete the system "${sys.name}"? This will also remove access to this system for all positions.`
       );
       
