@@ -21,5 +21,8 @@
   "type": "commonjs",
   "devDependencies": {
     "electron": "^25.9.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
   }
 }

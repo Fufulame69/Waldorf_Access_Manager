@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Method to show an alert dialog
   showAlertDialog: (message) => ipcRenderer.invoke('show-alert-dialog', message),
   
-  // File operations for data management
+  // Firebase operations for data management
   loadData: () => ipcRenderer.invoke('load-data'),
   saveData: (data) => ipcRenderer.invoke('save-data', data)
 });
