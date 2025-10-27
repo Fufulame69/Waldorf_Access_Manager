@@ -79,10 +79,24 @@ function switchTab(tab) {
   
   document.getElementById(tab).classList.add('active');
   
+  // Show/hide the add department button and action bar
+  const addDepartmentBtn = document.getElementById('addDepartmentBtn');
+  const actionBar = document.querySelector('#departments .action-bar');
+  if (tab === 'departments') {
+    // Only show the button when switching to departments tab
+    // The individual view functions (showDepartments, showPositions, showAccess) will handle visibility
+    actionBar.style.display = 'flex';
+  } else {
+    addDepartmentBtn.style.display = 'none';
+    actionBar.style.display = 'none';
+  }
+  
   if (tab === 'systems') {
     renderSystemsView();
   } else if (tab === 'formGenerator') { // ADDED
     renderFormGenerator();
+  } else if (tab === 'configuration') { // ADDED
+    renderConfiguration();
   } else if (tab === 'departments') { // UPDATED
     // When switching back to departments, reset to the top level
     showDepartments();
@@ -96,6 +110,9 @@ function showDepartments() {
   document.getElementById('departmentView').style.display = 'block';
   document.getElementById('positionView').style.display = 'none';
   document.getElementById('accessView').style.display = 'none';
+  
+  // Show the add department button only when viewing departments
+  document.getElementById('addDepartmentBtn').style.display = 'block';
   
   updateBreadcrumb(['Departments']);
   renderDepartments();
@@ -138,6 +155,9 @@ function showPositions(deptId) {
   document.getElementById('departmentView').style.display = 'none';
   document.getElementById('positionView').style.display = 'block';
   document.getElementById('accessView').style.display = 'none';
+  
+  // Hide the add department button when viewing positions
+  document.getElementById('addDepartmentBtn').style.display = 'none';
 
   updateBreadcrumb(['Departments', currentDepartment.name]);
   renderPositions();
@@ -182,6 +202,9 @@ function showAccess(positionId) {
 
   document.getElementById('positionView').style.display = 'none';
   document.getElementById('accessView').style.display = 'block';
+  
+  // Hide the add department button when viewing access matrix
+  document.getElementById('addDepartmentBtn').style.display = 'none';
 
   updateBreadcrumb(['Departments', currentDepartment.name, currentPosition.name]);
   renderAccessMatrix();
@@ -746,6 +769,50 @@ function renderFormGenerator() {
   loadGeneratedForms();
 }
 
+// Configuration Tab
+function renderConfiguration() {
+  const container = document.getElementById('configurationView');
+  
+  container.innerHTML = `
+    <div class="config-container">
+      <div class="config-module" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1.5rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">Form Generation Settings</h3>
+        <div class="form-group">
+          <div class="flex items-center justify-between">
+            <label for="onlyCheckedSystems">Show only checked systems in generated form</label>
+            <input type="checkbox" id="onlyCheckedSystems" onchange="saveConfiguration()" style="width: 1.5rem; height: 1.5rem;">
+          </div>
+          <p class="text-sm text-gray-600" style="margin-top: 0.25rem; margin-bottom: 0;">When enabled, only systems with access permissions will be displayed in the generated form.</p>
+        </div>
+      </div>
+      
+      <div class="config-module" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">About</h3>
+        <div class="form-group">
+          <p class="text-sm text-gray-700">Waldorf Access Manager v1.0.0</p>
+          <p class="text-sm text-gray-600">A system for managing employee access to hotel systems and applications.</p>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Load saved configuration
+  loadConfiguration();
+}
+
+// Load configuration from localStorage
+function loadConfiguration() {
+  const onlyCheckedSystems = localStorage.getItem('onlyCheckedSystems') === 'true';
+  document.getElementById('onlyCheckedSystems').checked = onlyCheckedSystems;
+}
+
+// Save configuration to localStorage
+function saveConfiguration() {
+  const onlyCheckedSystems = document.getElementById('onlyCheckedSystems').checked;
+  localStorage.setItem('onlyCheckedSystems', onlyCheckedSystems.toString());
+  console.log('Configuration saved:', { onlyCheckedSystems });
+}
+
 function updatePositionDropdown() {
   const deptName = document.getElementById('empDept').value;
   const posSelect = document.getElementById('empPos');
@@ -775,6 +842,12 @@ async function generateForm() {
       startDate: document.getElementById('empDate').value
     };
 
+    // Get configuration options from localStorage
+    const onlyCheckedSystems = localStorage.getItem('onlyCheckedSystems') === 'true';
+    const options = {
+      onlyCheckedSystems: onlyCheckedSystems
+    };
+
     // Validate required fields
     if (!userData.name || !userData.department || !userData.position) {
       await window.electronAPI.showAlertDialog('Please fill in all required fields: Name, Department, and Position.');
@@ -786,8 +859,8 @@ async function generateForm() {
     statusDiv.innerHTML = '<p class="text-blue-600">Generating form...</p>';
     document.getElementById('formOutput').style.display = 'block';
 
-    // Generate form via main process
-    const result = await window.electronAPI.generateForm(userData);
+    // Generate form via main process with options
+    const result = await window.electronAPI.generateForm(userData, options);
 
     if (result.success) {
       statusDiv.innerHTML = `

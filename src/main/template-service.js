@@ -57,128 +57,81 @@ class TemplateService {
   createSystemNameToIdMap(data) {
     const nameToIdMap = new Map();
     
-    // Add all systems with their checkbox IDs
+    // Add all systems with their dynamically generated checkbox IDs
     data.systems.forEach(system => {
-      // Convert system name to lowercase and replace spaces/special chars for matching
-      const normalizedName = system.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      // Generate checkbox ID the same way as in generateDynamicSystemSections
+      const checkboxId = system.name.toLowerCase()
+        .replace(/[^a-z0-9]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '');
+      
       nameToIdMap.set(system.name, system.id);
-      nameToIdMap.set(normalizedName, system.id);
-    });
-
-    // Add hardcoded mappings for template checkboxes that don't match system names exactly
-    const hardcodedMappings = {
-      'ar_clerk': 12,
-      'ar_manager': 10,
-      'bell_man': 19,
-      'concierge': 18,
-      'fd_agent': 17,
-      'fd_supervisor': 16,
-      'income_auditor': 11,
-      'finance_manager': 7,
-      'finance_supervisor': 9,
-      'fo_manager': 13,
-      'groups_ce_manager': 26,
-      'housekeeping_attend': 22,
-      'executive_housekeeper': 20,
-      'housekeeping_supervisor': 21,
-      'ism': 31,
-      'night_auditor': 14,
-      'night_manager': 15,
-      'opera_supervisor': 33,
-      'reservation_agent': 25,
-      'revenue_manager': 23,
-      'reservation_supervisor': 24,
-      'sales': 28,
-      'sales_manager': 27,
-      'security': 8,
-      'telephone_operator': 30,
-      'telephone_supervisor': 29,
-      'onq_ri': 5,
-      'sun': 71,
-      'bmqa': 72,
-      'proplan': 76,
-      'operations_audit': 73,
-      'blackline': 75,
-      'datalink': 74,
-      'fms': 77,
-      'recepcion': 79,
-      'finanzas': 78,
-      'administrador': 80,
-      'general_manager': 34,
-      'po_req_selectdepts': 39,
-      'director_of_finance': 35,
-      'po_aprv_req_selectdepts': 40,
-      'accounts_payable': 36,
-      'it_manager': 41,
-      'dir_of_pur': 37,
-      'po_req_selectdepts_recv_aprv': 42,
-      'storeroom_receiver': 38,
-      'cost_controller_accounts_payable': 43,
-      'administrador_monolith': 57,
-      'gerente_reg_acciones': 58,
-      'gerente_reloj_marcador': 59,
-      'emc': 60,
-      'reporting_analytics': 61,
-      'tarjeta_pos': 62,
-      'server': 63,
-      'bartender': 64,
-      'in_room_dining': 65,
-      'cashier': 66,
-      'cashier_discount': 67,
-      'supervisor_symphony': 68,
-      'manager_symphony': 69,
-      'property_expert': 70,
-      'sinergy_mms': 101,
-      'avero': 81,
-      'vantage': 102,
-      'delphi': 103,
-      'cloudflare': 100,
-      'reports': 99,
-      'op_audit': 98,
-      'vision_line': 97,
-      'opentable': 96,
-      'book4time': 95,
-      'sertify': 94,
-      'pressreader': 93,
-      'zennio': 92,
-      'bms': 91,
-      'owner_rlt': 90,
-      'foxit': 89,
-      'adobe': 88,
-      'alice': 87,
-      'wiq': 86,
-      'kypsu': 85,
-      'trayaway': 84,
-      'kualtrix': 83,
-      'synergymms': 82,
-      'cb': 109,
-      'eng': 104,
-      'fb': 110,
-      'fc': 111,
-      'fo': 112,
-      'gm': 113,
-      'hrd': 114,
-      'hsk': 115,
-      'ism_group': 116,
-      'kit': 117,
-      'mkt': 118,
-      'oa': 108,
-      'pr': 106,
-      'pur': 119,
-      'res': 120,
-      'sal': 121,
-      'sec': 122,
-      'hc': 107,
-      'hod': 123,
-      'sox': 105
-    };
-
-    // Add hardcoded mappings to the map
-    Object.entries(hardcodedMappings).forEach(([checkboxId, systemId]) => {
-      nameToIdMap.set(checkboxId, systemId);
+      nameToIdMap.set(checkboxId, system.id);
     });
 
     return nameToIdMap;
+  }
+
+  /**
+   * Generate dynamic HTML sections for systems based on database categories and systems
+   * @param {Object} data - The complete database data
+   * @param {Object} permissions - User permissions object (optional)
+   * @param {boolean} onlyChecked - Whether to only show checked systems (optional)
+   * @returns {string} HTML string for all system sections
+   */
+  generateDynamicSystemSections(data, permissions = {}, onlyChecked = false) {
+    // Group systems by category
+    const categorizedSystems = {};
+    data.systems.forEach(system => {
+      const category = data.categories.find(cat => cat.id === system.categoryId);
+      const categoryName = category ? category.name : 'Uncategorized';
+      
+      if (!categorizedSystems[categoryName]) {
+        categorizedSystems[categoryName] = [];
+      }
+      categorizedSystems[categoryName].push(system);
+    });
+
+    // Generate HTML for each category
+    let sectionsHtml = '';
+    
+    Object.entries(categorizedSystems).forEach(([categoryName, systems]) => {
+      // Filter systems if onlyChecked is true
+      let filteredSystems = systems;
+      if (onlyChecked) {
+        filteredSystems = systems.filter(system => permissions[system.id] === true);
+      }
+      
+      // Skip categories with no systems after filtering
+      if (filteredSystems.length === 0) return;
+      
+      // Generate checkbox ID for each system (lowercase, replace special chars)
+      const systemCheckboxes = filteredSystems.map(system => {
+        const checkboxId = system.name.toLowerCase()
+          .replace(/[^a-z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+        
+        return `<div class="flex items-center">
+          <input type="checkbox" id="${checkboxId}" name="permissions" value="${system.name}" style="margin-right: var(--space-1);">
+          <label for="${checkboxId}">${system.name}</label>
+        </div>`;
+      }).join('\n                        ');
+
+      // Use flexbox for responsive layout that flows horizontally then wraps
+      let gridClass = 'flex flex-wrap';
+
+      sectionsHtml += `
+                <!-- ${categoryName.toUpperCase()} Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">${categoryName.toUpperCase()}</h4>
+                    <div class="${gridClass}" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        ${systemCheckboxes}
+                    </div>
+                </div>`;
+    });
+
+    return sectionsHtml;
   }
 
   /**
@@ -191,14 +144,29 @@ class TemplateService {
    * @param {string} userData.email - User email
    * @param {string} userData.idmLogin - IDM login
    * @param {string} userData.startDate - Start date
+   * @param {Object} options - Configuration options
+   * @param {boolean} options.onlyCheckedSystems - Whether to only show checked systems
    * @returns {Promise<string>} The hydrated HTML content
    */
-  async hydrateTemplate(data, userData) {
+  async hydrateTemplate(data, userData, options = {}) {
     let template = await this.readTemplate();
     
     // Get user permissions
     const permissions = this.getUserPermissions(data, userData.department, userData.position);
     const systemNameToIdMap = this.createSystemNameToIdMap(data);
+
+    // Generate dynamic system sections with optional filtering
+    const dynamicSections = this.generateDynamicSystemSections(
+      data,
+      permissions,
+      options.onlyCheckedSystems || false
+    );
+
+    // Replace the placeholder for system sections with dynamic content
+    template = template.replace(
+      '<!-- DYNAMIC_SYSTEM_SECTIONS_PLACEHOLDER -->',
+      dynamicSections
+    );
 
     // Replace user information fields
     template = template.replace('id="nombre"', `id="nombre" value="${userData.name || ''}"`);
@@ -242,9 +210,11 @@ class TemplateService {
    * @param {Object} data - The complete database data
    * @param {Object} userData - User information
    * @param {string} outputDir - Output directory path
+   * @param {Object} options - Configuration options
+   * @param {boolean} options.onlyCheckedSystems - Whether to only show checked systems
    * @returns {Promise<string>} Path to the generated file
    */
-  async generateForm(data, userData, outputDir = './generated-forms') {
+  async generateForm(data, userData, outputDir = './generated-forms', options = {}) {
     try {
       // Create output directory if it doesn't exist
       await fs.mkdir(outputDir, { recursive: true });
@@ -255,8 +225,8 @@ class TemplateService {
       const filename = `solicitud_${sanitizedName}_${timestamp}.html`;
       const filePath = path.join(outputDir, filename);
 
-      // Hydrate the template
-      const hydratedContent = await this.hydrateTemplate(data, userData);
+      // Hydrate the template with options
+      const hydratedContent = await this.hydrateTemplate(data, userData, options);
 
       // Write the file
       await fs.writeFile(filePath, hydratedContent, 'utf8');

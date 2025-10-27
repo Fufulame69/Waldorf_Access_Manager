@@ -197,39 +197,48 @@ body {
 /* Access Matrix */
 .access-section {
   margin-top: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
 }
 
 .category-block {
-  margin-bottom: 30px;
   background: #FFFFFF;
   padding: 20px;
   border: 1px solid #000;
+  flex: 0 0 auto;
+  width: fit-content;
+  min-width: 200px;
+  max-width: 300px;
 }
 
 .category-title {
-  font-size: 1.3em;
+  font-size: 1.1em;
   font-weight: 700;
   color: #000;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
   border-bottom: 2px solid #000;
 }
 
 .systems-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .system-checkbox {
   display: flex;
   align-items: center;
   background: white;
-  padding: 12px 15px;
+  padding: 8px 12px;
   cursor: pointer;
   transition: all 0.3s;
   border: 1px solid #000;
+  font-size: 0.9em;
 }
 
 .system-checkbox:hover {
@@ -239,12 +248,13 @@ body {
 }
 
 .system-checkbox input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-right: 12px;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
   cursor: pointer;
   accent-color: #000;
   border-radius: 0;
+  flex-shrink: 0;
 }
 
 .system-checkbox label {
@@ -252,6 +262,7 @@ body {
   font-weight: 500;
   color: #000;
   user-select: none;
+  word-wrap: break-word;
 }
 
 /* Systems Management */

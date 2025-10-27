@@ -64,13 +64,13 @@ ipcMain.handle('save-data', async (event, data) => {
 });
 
 // IPC handler for generating forms
-ipcMain.handle('generate-form', async (event, userData) => {
+ipcMain.handle('generate-form', async (event, userData, options = {}) => {
   try {
     // Get the current data from Firebase
     const data = await getDatabase();
     
     // Generate the form
-    const formPath = await templateService.generateForm(data, userData);
+    const formPath = await templateService.generateForm(data, userData, './generated-forms', options);
     
     // Read existing forms or create new array
     const formsDir = path.join(process.cwd(), 'generated-forms');

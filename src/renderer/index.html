@@ -19,6 +19,7 @@
         <button class="tab" onclick="switchTab('systems')">Systems Managment</button>
         <!-- ADDED new tab button -->
         <button class="tab" onclick="switchTab('formGenerator')">Form Generator</button>
+        <button class="tab" onclick="switchTab('configuration')">Configuration</button>
       </div>
     </nav>
 
@@ -35,7 +36,7 @@
           <div class="search-box">
             <input type="text" id="searchInput" placeholder="🔍 Search departments or positions..." onkeyup="filterItems()">
           </div>
-          <button class="btn btn-primary" onclick="openModal('addDepartment')">+ Add Department</button>
+          <button id="addDepartmentBtn" class="btn btn-primary" onclick="openModal('addDepartment')">+ Add Department</button>
         </div>
 
         <div id="departmentView"></div>
@@ -59,6 +60,16 @@
         </div>
         <div id="formGeneratorView">
           <!-- Form content will be rendered here by app.js -->
+        </div>
+      </div>
+
+      <!-- ADDED Configuration Tab -->
+      <div id="configuration" class="tab-content">
+        <div class="action-bar">
+          <h2>Configuration</h2>
+        </div>
+        <div id="configurationView">
+          <!-- Configuration content will be rendered here by app.js -->
         </div>
       </div>
     </main>

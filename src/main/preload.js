@@ -13,7 +13,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveData: (data) => ipcRenderer.invoke('save-data', data),
   
   // Form generation operations
-  generateForm: (userData) => ipcRenderer.invoke('generate-form', userData),
+  generateForm: (userData, options) => ipcRenderer.invoke('generate-form', userData, options),
   getGeneratedForms: () => ipcRenderer.invoke('get-generated-forms'),
   openGeneratedFile: (filename) => ipcRenderer.invoke('open-generated-file', filename)
 });
