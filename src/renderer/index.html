@@ -17,6 +17,8 @@
       <div class="sidebar-nav">
         <button class="tab active" onclick="switchTab('departments')">Departments and positions</button>
         <button class="tab" onclick="switchTab('systems')">Systems Managment</button>
+        <!-- ADDED new tab button -->
+        <button class="tab" onclick="switchTab('formGenerator')">Form Generator</button>
       </div>
     </nav>
 
@@ -48,6 +50,16 @@
           <button class="btn btn-primary" onclick="openModal('addCategory')">+ Add Category</button>
         </div>
         <div id="systemsView"></div>
+      </div>
+
+      <!-- ADDED Form Generator Tab -->
+      <div id="formGenerator" class="tab-content">
+        <div class="action-bar">
+          <h2>New Employee Access Form</h2>
+        </div>
+        <div id="formGeneratorView">
+          <!-- Form content will be rendered here by app.js -->
+        </div>
       </div>
     </main>
   </div>

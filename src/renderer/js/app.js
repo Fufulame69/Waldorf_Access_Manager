@@ -69,13 +69,21 @@ function switchTab(tab) {
   // event.target will be the button clicked
   if (event && event.target) {
     event.target.classList.add('active');
+  } else {
+    // Fallback for direct calls if event is not passed
+    const targetTab = Array.from(document.querySelectorAll('.sidebar-nav .tab')).find(t => t.onclick.toString().includes(`switchTab('${tab}')`));
+    if (targetTab) {
+      targetTab.classList.add('active');
+    }
   }
   
   document.getElementById(tab).classList.add('active');
   
   if (tab === 'systems') {
     renderSystemsView();
-  } else {
+  } else if (tab === 'formGenerator') { // ADDED
+    renderFormGenerator();
+  } else if (tab === 'departments') { // UPDATED
     // When switching back to departments, reset to the top level
     showDepartments();
   }
@@ -253,12 +261,12 @@ function renderSystemsView() {
             <div class="category-header">
               <span class="category-name">${cat.name}</span>
               <div>
-                <button class="btn btn-success" onclick="openModal('addSystem', ${cat.id})">+ Add System</button>
+                <button class="btn btn-success" onclick="openModal('addSystem', ${cat.id})">+ Add</button>
                 <button class="icon-btn" onclick="editCategory(${cat.id})">✏️</button>
                 <button class="icon-btn" onclick="deleteCategory(${cat.id})">🗑️</button>
               </div>
             </div>
-            ${systems.length === 0 ? '<p style="color:#6c757d;">No systems in this category</p>' : `
+            ${systems.length === 0 ? '<p style="color:#6c757d; font-size: 0.9em;">No systems</p>' : `
               <div class="system-list">
                 ${systems.map(sys => `
                   <div class="system-tag">
@@ -667,6 +675,204 @@ async function deleteSystem(id) {
   
   await saveData();
   renderSystemsView();
+}
+
+// Form Generator
+function renderFormGenerator() {
+  const container = document.getElementById('formGeneratorView');
+  
+  // Get current date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Get departments for dropdown
+  const departmentOptions = data.departments.map(dept =>
+    `<option value="${dept.name}">${dept.name}</option>`
+  ).join('');
+
+  container.innerHTML = `
+    <div class="form-container">
+      <div class="form-group">
+        <label for="empName">Employee Name</label>
+        <input type="text" id="empName" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label for="empOnQ">IDM Login Name</label>
+        <input type="text" id="empOnQ" placeholder="Enter IDM login name">
+      </div>
+      <div class="form-group">
+        <label for="empMail">Email Account</label>
+        <input type="email" id="empMail" placeholder="Enter email address">
+      </div>
+      <div class="form-group">
+        <label for="empDept">Department</label>
+        <select id="empDept" onchange="updatePositionDropdown()">
+          <option value="">Select Department</option>
+          ${departmentOptions}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="empPos">Position</label>
+        <select id="empPos">
+          <option value="">Select Position</option>
+          <!-- Positions will be populated based on department selection -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="empDate">Start Date</label>
+        <input type="date" id="empDate" value="${today}">
+      </div>
+      <button class="btn btn-primary" onclick="generateForm()">Generate Form</button>
+      
+      <div id="formOutput" style="display: none;">
+        <h3>Generated Form</h3>
+        <div class="form-actions">
+          <button class="btn btn-success" onclick="openGeneratedForm()">Open Form</button>
+          <button class="btn btn-info" onclick="openFormsIndex()">View All Forms</button>
+        </div>
+        <div id="formStatus"></div>
+      </div>
+      
+      <div id="generatedFormsList" style="margin-top: 2rem;">
+        <h3>Recently Generated Forms</h3>
+        <div id="formsListContent"></div>
+      </div>
+    </div>
+  `;
+  
+  // Initial call to populate positions
+  updatePositionDropdown();
+  
+  // Load recently generated forms
+  loadGeneratedForms();
+}
+
+function updatePositionDropdown() {
+  const deptName = document.getElementById('empDept').value;
+  const posSelect = document.getElementById('empPos');
+  
+  posSelect.innerHTML = '<option value="">Select Position</option>'; // Clear existing options
+  
+  if (deptName) {
+    const dept = data.departments.find(d => d.name === deptName);
+    if (dept && dept.positions) {
+      const positionOptions = dept.positions.map(pos =>
+        `<option value="${pos.name}">${pos.name}</option>`
+      ).join('');
+      posSelect.innerHTML += positionOptions;
+    }
+  }
+}
+
+async function generateForm() {
+  try {
+    // Get form data
+    const userData = {
+      name: document.getElementById('empName').value.trim(),
+      idmLogin: document.getElementById('empOnQ').value.trim(),
+      email: document.getElementById('empMail').value.trim(),
+      department: document.getElementById('empDept').value,
+      position: document.getElementById('empPos').value,
+      startDate: document.getElementById('empDate').value
+    };
+
+    // Validate required fields
+    if (!userData.name || !userData.department || !userData.position) {
+      await window.electronAPI.showAlertDialog('Please fill in all required fields: Name, Department, and Position.');
+      return;
+    }
+
+    // Show loading state
+    const statusDiv = document.getElementById('formStatus');
+    statusDiv.innerHTML = '<p class="text-blue-600">Generating form...</p>';
+    document.getElementById('formOutput').style.display = 'block';
+
+    // Generate form via main process
+    const result = await window.electronAPI.generateForm(userData);
+
+    if (result.success) {
+      statusDiv.innerHTML = `
+        <p class="text-green-600">✅ Form generated successfully!</p>
+        <p class="text-sm text-gray-600">File: ${result.filename}</p>
+      `;
+      
+      // Store the generated file path for later use
+      window.lastGeneratedForm = result.filename;
+      
+      // Reload the forms list
+      loadGeneratedForms();
+    } else {
+      statusDiv.innerHTML = `<p class="text-red-600">❌ Error: ${result.error}</p>`;
+    }
+  } catch (error) {
+    console.error('Error generating form:', error);
+    const statusDiv = document.getElementById('formStatus');
+    statusDiv.innerHTML = `<p class="text-red-600">❌ Error: ${error.message}</p>`;
+  }
+}
+
+async function openGeneratedForm() {
+  if (window.lastGeneratedForm) {
+    await window.electronAPI.openGeneratedFile(window.lastGeneratedForm);
+  } else {
+    await window.electronAPI.showAlertDialog('No form has been generated yet.');
+  }
+}
+
+async function openFormsIndex() {
+  await window.electronAPI.openGeneratedFile('index.html');
+}
+
+async function loadGeneratedForms() {
+  try {
+    const forms = await window.electronAPI.getGeneratedForms();
+    const formsListContent = document.getElementById('formsListContent');
+    
+    if (forms.length === 0) {
+      formsListContent.innerHTML = '<p class="text-gray-500">No forms generated yet.</p>';
+      return;
+    }
+
+    // Show last 5 forms
+    const recentForms = forms.slice(-5).reverse();
+    
+    formsListContent.innerHTML = `
+      <div class="forms-table">
+        <table class="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="border border-gray-300 px-4 py-2 text-left">Employee</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">Department</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">Position</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">Generated</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${recentForms.map(form => `
+              <tr>
+                <td class="border border-gray-300 px-4 py-2">${form.name}</td>
+                <td class="border border-gray-300 px-4 py-2">${form.department}</td>
+                <td class="border border-gray-300 px-4 py-2">${form.position}</td>
+                <td class="border border-gray-300 px-4 py-2">${new Date(form.generatedAt).toLocaleString('es-CR')}</td>
+                <td class="border border-gray-300 px-4 py-2">
+                  <button class="btn btn-sm btn-primary" onclick="window.electronAPI.openGeneratedFile('${form.filename}')">Open</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ${forms.length > 5 ? `
+          <div class="mt-4">
+            <button class="btn btn-info" onclick="openFormsIndex()">View All ${forms.length} Forms</button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error loading generated forms:', error);
+    document.getElementById('formsListContent').innerHTML =
+      '<p class="text-red-600">Error loading forms list.</p>';
+  }
 }
 
 // Breadcrumb
