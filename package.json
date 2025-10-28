@@ -23,6 +23,7 @@
     "electron": "^25.9.0"
   },
   "dependencies": {
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "puppeteer": "^24.26.1"
   }
 }

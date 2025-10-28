@@ -101,6 +101,9 @@ function switchTab(tab) {
     // When switching back to departments, reset to the top level
     showDepartments();
   }
+  
+  // Update translations after switching tabs
+  translationService.updateUI();
 }
 
 // Department View
@@ -116,6 +119,8 @@ function showDepartments() {
   
   updateBreadcrumb(['Departments']);
   renderDepartments();
+  // Update translations after rendering
+  translationService.updateUI();
 }
 
 function renderDepartments() {
@@ -136,11 +141,11 @@ function renderDepartments() {
       ${data.departments.map(dept => `
         <div class="dept-card" onclick="showPositions(${dept.id})">
           <div class="dept-actions" onclick="event.stopPropagation()">
-            <button class="icon-btn" onclick="editDepartment(${dept.id})" title="Edit">✏️</button>
-            <button class="icon-btn" onclick="deleteDepartment(${dept.id})" title="Delete">🗑️</button>
+            <button class="icon-btn" onclick="editDepartment(${dept.id})" title="${t('edit')}">✏️</button>
+            <button class="icon-btn" onclick="deleteDepartment(${dept.id})" title="${t('delete')}">🗑️</button>
           </div>
           <h3>${dept.name}</h3>
-          <p>${dept.positions ? dept.positions.length : 0} positions</p>
+          <p>${dept.positions ? dept.positions.length : 0} ${t('positions')}</p>
         </div>
       `).join('')}
     </div>
@@ -161,6 +166,8 @@ function showPositions(deptId) {
 
   updateBreadcrumb(['Departments', currentDepartment.name]);
   renderPositions();
+  // Update translations after rendering
+  translationService.updateUI();
 }
 
 function renderPositions() {
@@ -169,13 +176,13 @@ function renderPositions() {
 
   container.innerHTML = `
     <div class="action-bar">
-      <h2>${currentDepartment.name} - Positions</h2>
-      <button class="btn btn-primary" onclick="openModal('addPosition')">+ Add Position</button>
+      <h2>${t('departmentPositions', { departmentName: currentDepartment.name })}</h2>
+      <button class="btn btn-primary" onclick="openModal('addPosition')">${t('addPosition')}</button>
     </div>
     ${positions.length === 0 ? `
       <div class="empty-state">
-        <h3>No Positions Yet</h3>
-        <p>Click "Add Position" to add a position to this department</p>
+        <h3>${t('noPositionsYet')}</h3>
+        <p>${t('clickAddPositionToStart')}</p>
       </div>
     ` : `
       <div class="position-list">
@@ -184,8 +191,8 @@ function renderPositions() {
             <div class="position-header">
               <span class="position-name">${pos.name}</span>
               <div class="dept-actions" onclick="event.stopPropagation()">
-                <button class="icon-btn" onclick="editPosition(${pos.id})" title="Edit">✏️</button>
-                <button class="icon-btn" onclick="deletePosition(${pos.id})" title="Delete">🗑️</button>
+                <button class="icon-btn" onclick="editPosition(${pos.id})" title="${t('edit')}">✏️</button>
+                <button class="icon-btn" onclick="deletePosition(${pos.id})" title="${t('delete')}">🗑️</button>
               </div>
             </div>
           </div>
@@ -208,6 +215,8 @@ function showAccess(positionId) {
 
   updateBreadcrumb(['Departments', currentDepartment.name, currentPosition.name]);
   renderAccessMatrix();
+  // Update translations after rendering
+  translationService.updateUI();
 }
 
 function renderAccessMatrix() {
@@ -227,7 +236,7 @@ function renderAccessMatrix() {
 
   container.innerHTML = `
     <div class="action-bar">
-      <h2>Access Management - ${currentPosition.name}</h2>
+      <h2>${t('accessManagement', { positionName: currentPosition.name })}</h2>
     </div>
     <div class="access-section">
       ${Object.entries(categorizedSystems).map(([catName, systems]) => `
@@ -236,9 +245,9 @@ function renderAccessMatrix() {
           <div class="systems-grid">
             ${systems.map(sys => `
               <div class="system-checkbox">
-                <input 
-                  type="checkbox" 
-                  id="sys-${sys.id}" 
+                <input
+                  type="checkbox"
+                  id="sys-${sys.id}"
                   ${access[sys.id] ? 'checked' : ''}
                   onchange="toggleAccess(${sys.id})"
                 >
@@ -284,19 +293,19 @@ function renderSystemsView() {
             <div class="category-header">
               <span class="category-name">${cat.name}</span>
               <div>
-                <button class="btn btn-success" onclick="openModal('addSystem', ${cat.id})">+ Add</button>
-                <button class="icon-btn" onclick="editCategory(${cat.id})">✏️</button>
-                <button class="icon-btn" onclick="deleteCategory(${cat.id})">🗑️</button>
+                <button class="btn btn-success" onclick="openModal('addSystem', ${cat.id})">${t('add')}</button>
+                <button class="icon-btn" onclick="editCategory(${cat.id})" title="${t('edit')}">✏️</button>
+                <button class="icon-btn" onclick="deleteCategory(${cat.id})" title="${t('delete')}">🗑️</button>
               </div>
             </div>
-            ${systems.length === 0 ? '<p style="color:#6c757d; font-size: 0.9em;">No systems</p>' : `
+            ${systems.length === 0 ? `<p style="color:#6c757d; font-size: 0.9em;">${t('noSystems')}</p>` : `
               <div class="system-list">
                 ${systems.map(sys => `
                   <div class="system-tag">
                     <span>${sys.name}</span>
                     <div>
-                      <button class="icon-btn" onclick="editSystem(${sys.id})">✏️</button>
-                      <button class="icon-btn" onclick="deleteSystem(${sys.id})">🗑️</button>
+                      <button class="icon-btn" onclick="editSystem(${sys.id})" title="${t('edit')}">✏️</button>
+                      <button class="icon-btn" onclick="deleteSystem(${sys.id})" title="${t('delete')}">🗑️</button>
                     </div>
                   </div>
                 `).join('')}
@@ -317,110 +326,110 @@ function openModal(type, param) {
 
   switch(type) {
     case 'addDepartment':
-      title.textContent = 'Add Department';
+      title.textContent = t('addDepartmentTitle');
       body.innerHTML = `
         <div class="form-group">
-          <label>Department Name</label>
-          <input type="text" id="deptName" placeholder="Enter department name">
+          <label>${t('departmentName')}</label>
+          <input type="text" id="deptName" placeholder="${t('enterDepartmentName')}">
         </div>
-        <button class="btn btn-primary" onclick="addDepartment()">Add Department</button>
+        <button class="btn btn-primary" onclick="addDepartment()">${t('addDepartmentBtn')}</button>
       `;
       break;
 
     case 'editDepartment':
       const dept = param;
-      title.textContent = 'Edit Department';
+      title.textContent = t('editDepartmentTitle');
       body.innerHTML = `
         <div class="form-group">
-          <label>Department Name</label>
+          <label>${t('departmentName')}</label>
           <input type="text" id="deptName" value="${dept.name}">
         </div>
-        <button class="btn btn-primary" onclick="updateDepartment(${dept.id})">Update Department</button>
+        <button class="btn btn-primary" onclick="updateDepartment(${dept.id})">${t('updateDepartmentBtn')}</button>
       `;
       break;
 
     case 'addPosition':
-      title.textContent = 'Add Position';
+      title.textContent = t('addPositionTitle');
       body.innerHTML = `
         <div class="form-group">
-          <label>Position Name</label>
-          <input type="text" id="posName" placeholder="Enter position name">
+          <label>${t('positionName')}</label>
+          <input type="text" id="posName" placeholder="${t('enterPositionName')}">
         </div>
-        <button class="btn btn-primary" onclick="addPosition()">Add Position</button>
+        <button class="btn btn-primary" onclick="addPosition()">${t('addPositionBtn')}</button>
       `;
       break;
 
     case 'editPosition':
       const pos = param;
-      title.textContent = 'Edit Position';
+      title.textContent = t('editPositionTitle');
       body.innerHTML = `
         <div class="form-group">
-          <label>Position Name</label>
+          <label>${t('positionName')}</label>
           <input type="text" id="posName" value="${pos.name}">
         </div>
-        <button class="btn btn-primary" onclick="updatePosition(${pos.id})">Update Position</button>
+        <button class="btn btn-primary" onclick="updatePosition(${pos.id})">${t('updatePositionBtn')}</button>
       `;
       break;
 
     case 'addCategory':
-      title.textContent = 'Add Category';
+      title.textContent = t('addCategoryTitle');
       body.innerHTML = `
         <div class="form-group">
-          <label>Category Name</label>
-          <input type="text" id="catName" placeholder="Enter category name">
+          <label>${t('categoryName')}</label>
+          <input type="text" id="catName" placeholder="${t('enterCategoryName')}">
         </div>
-        <button class="btn btn-primary" onclick="addCategory()">Add Category</button>
+        <button class="btn btn-primary" onclick="addCategory()">${t('addCategoryBtn')}</button>
       `;
       break;
 
     case 'editCategory':
       const cat = param;
-      title.textContent = 'Edit Category';
+      title.textContent = t('editCategoryTitle');
       body.innerHTML = `
         <div class="form-group">
-          <label>Category Name</label>
+          <label>${t('categoryName')}</label>
           <input type="text" id="catName" value="${cat.name}">
         </div>
-        <button class="btn btn-primary" onclick="updateCategory(${cat.id})">Update Category</button>
+        <button class="btn btn-primary" onclick="updateCategory(${cat.id})">${t('updateCategoryBtn')}</button>
       `;
       break;
 
     case 'addSystem':
-      title.textContent = 'Add System';
+      title.textContent = t('addSystemTitle');
       body.innerHTML = `
         <div class="form-group">
-          <label>System Name</label>
-          <input type="text" id="sysName" placeholder="Enter system name">
+          <label>${t('systemName')}</label>
+          <input type="text" id="sysName" placeholder="${t('enterSystemName')}">
         </div>
         <div class="form-group">
-          <label>Category</label>
+          <label>${t('category')}</label>
           <select id="sysCat">
             ${data.categories.map(c => `
               <option value="${c.id}" ${c.id === param ? 'selected' : ''}>${c.name}</option>
             `).join('')}
           </select>
         </div>
-        <button class="btn btn-primary" onclick="addSystem()">Add System</button>
+        <button class="btn btn-primary" onclick="addSystem()">${t('addSystemBtn')}</button>
       `;
       break;
 
     case 'editSystem':
       const sys = param;
-      title.textContent = 'Edit System';
+      title.textContent = t('editSystemTitle');
       body.innerHTML = `
         <div class="form-group">
-          <label>System Name</label>
+          <label>${t('systemName')}</label>
           <input type="text" id="sysName" value="${sys.name}">
         </div>
         <div class="form-group">
-          <label>Category</label>
+          <label>${t('category')}</label>
           <select id="sysCat">
             ${data.categories.map(c => `
               <option value="${c.id}" ${c.id === sys.categoryId ? 'selected' : ''}>${c.name}</option>
             `).join('')}
           </select>
         </div>
-        <button class="btn btn-primary" onclick="updateSystem(${sys.id})">Update System</button>
+        <button class="btn btn-primary" onclick="updateSystem(${sys.id})">${t('updateSystemBtn')}</button>
       `;
       break;
   }
@@ -483,7 +492,7 @@ async function deleteDepartment(id) {
   if (!dept) return;
   
   const confirmed = await window.electronAPI.showConfirmDialog(
-    `Are you sure you want to delete the department "${dept.name}"? This will also delete all positions in this department and their access permissions.`
+    t('confirmDeleteDepartment', { departmentName: dept.name })
   );
   
   if (!confirmed) return;
@@ -543,6 +552,8 @@ async function updatePosition(id) {
     await saveData();
     closeModal();
     renderPositions();
+    // Update translations after rendering
+    translationService.updateUI();
   }
 }
 
@@ -551,7 +562,7 @@ async function deletePosition(id) {
   if (!pos) return;
   
   const confirmed = await window.electronAPI.showConfirmDialog(
-    `Are you sure you want to delete the position "${pos.name}"? This will also delete all access permissions for this position.`
+    t('confirmDeletePosition', { positionName: pos.name })
   );
   
   if (!confirmed) return;
@@ -583,6 +594,8 @@ async function addCategory() {
   await saveData();
   closeModal();
   renderSystemsView();
+  // Update translations after rendering
+  translationService.updateUI();
 }
 
 async function editCategory(id) {
@@ -611,7 +624,7 @@ async function deleteCategory(id) {
   const systems = data.systems.filter(s => s.categoryId === id);
   if (systems.length > 0) {
     await window.electronAPI.showAlertDialog(
-      'Cannot delete category with systems. Please delete or reassign all systems first.'
+      t('cannotDeleteCategoryWithSystems')
     );
     return;
   }
@@ -620,7 +633,7 @@ async function deleteCategory(id) {
   if (!cat) return;
   
   const confirmed = await window.electronAPI.showConfirmDialog(
-    `Are you sure you want to delete the category "${cat.name}"?`
+    t('confirmDeleteCategory', { categoryName: cat.name })
   );
   
   if (!confirmed) return;
@@ -628,6 +641,8 @@ async function deleteCategory(id) {
   data.categories = data.categories.filter(c => c.id !== id);
   await saveData();
   renderSystemsView();
+  // Update translations after rendering
+  translationService.updateUI();
 }
 
 // CRUD Operations - Systems
@@ -650,6 +665,8 @@ async function addSystem() {
   await saveData();
   closeModal();
   renderSystemsView();
+  // Update translations after rendering
+  translationService.updateUI();
 }
 
 async function editSystem(id) {
@@ -682,7 +699,7 @@ async function deleteSystem(id) {
   if (!sys) return;
   
   const confirmed = await window.electronAPI.showConfirmDialog(
-    `Are you sure you want to delete the system "${sys.name}"? This will also remove access to this system for all positions.`
+    t('confirmDeleteSystem', { systemName: sys.name })
   );
   
   if (!confirmed) return;
@@ -698,6 +715,8 @@ async function deleteSystem(id) {
   
   await saveData();
   renderSystemsView();
+  // Update translations after rendering
+  translationService.updateUI();
 }
 
 // Form Generator
@@ -715,48 +734,48 @@ function renderFormGenerator() {
   container.innerHTML = `
     <div class="form-container">
       <div class="form-group">
-        <label for="empName">Employee Name</label>
-        <input type="text" id="empName" placeholder="Enter full name">
+        <label for="empName">${t('employeeName')}</label>
+        <input type="text" id="empName" placeholder="${t('enterFullName')}">
       </div>
       <div class="form-group">
-        <label for="empOnQ">IDM Login Name</label>
-        <input type="text" id="empOnQ" placeholder="Enter IDM login name">
+        <label for="empOnQ">${t('idmLoginName')}</label>
+        <input type="text" id="empOnQ" placeholder="${t('enterIdmLoginName')}">
       </div>
       <div class="form-group">
-        <label for="empMail">Email Account</label>
-        <input type="email" id="empMail" placeholder="Enter email address">
+        <label for="empMail">${t('emailAccount')}</label>
+        <input type="email" id="empMail" placeholder="${t('enterEmailAddress')}">
       </div>
       <div class="form-group">
-        <label for="empDept">Department</label>
+        <label for="empDept">${t('department')}</label>
         <select id="empDept" onchange="updatePositionDropdown()">
-          <option value="">Select Department</option>
+          <option value="">${t('selectDepartment')}</option>
           ${departmentOptions}
         </select>
       </div>
       <div class="form-group">
-        <label for="empPos">Position</label>
+        <label for="empPos">${t('position')}</label>
         <select id="empPos">
-          <option value="">Select Position</option>
+          <option value="">${t('selectPosition')}</option>
           <!-- Positions will be populated based on department selection -->
         </select>
       </div>
       <div class="form-group">
-        <label for="empDate">Start Date</label>
+        <label for="empDate">${t('startDate')}</label>
         <input type="date" id="empDate" value="${today}">
       </div>
-      <button class="btn btn-primary" onclick="generateForm()">Generate Form</button>
+      <button class="btn btn-primary" onclick="generateForm()">${t('generateForm')}</button>
       
       <div id="formOutput" style="display: none;">
-        <h3>Generated Form</h3>
+        <h3>${t('generatedForm')}</h3>
         <div class="form-actions">
-          <button class="btn btn-success" onclick="openGeneratedForm()">Open Form</button>
-          <button class="btn btn-info" onclick="openFormsIndex()">View All Forms</button>
+          <button class="btn btn-success" onclick="openGeneratedForm()">${t('openForm')}</button>
+          <button class="btn btn-info" onclick="openFormsIndex()">${t('viewAllForms')}</button>
         </div>
         <div id="formStatus"></div>
       </div>
       
       <div id="generatedFormsList" style="margin-top: 2rem;">
-        <h3>Recently Generated Forms</h3>
+        <h3>${t('recentlyGeneratedForms')}</h3>
         <div id="formsListContent"></div>
       </div>
     </div>
@@ -767,6 +786,8 @@ function renderFormGenerator() {
   
   // Load recently generated forms
   loadGeneratedForms();
+  // Update translations after rendering
+  translationService.updateUI();
 }
 
 // Configuration Tab
@@ -776,21 +797,32 @@ function renderConfiguration() {
   container.innerHTML = `
     <div class="config-container">
       <div class="config-module" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1.5rem;">
-        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">Form Generation Settings</h3>
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">${t('formGenerationSettings')}</h3>
         <div class="form-group">
           <div class="flex items-center justify-between">
-            <label for="onlyCheckedSystems">Show only checked systems in generated form</label>
+            <label for="onlyCheckedSystems">${t('showOnlyCheckedSystems')}</label>
             <input type="checkbox" id="onlyCheckedSystems" onchange="saveConfiguration()" style="width: 1.5rem; height: 1.5rem;">
           </div>
-          <p class="text-sm text-gray-600" style="margin-top: 0.25rem; margin-bottom: 0;">When enabled, only systems with access permissions will be displayed in the generated form.</p>
+          <p class="text-sm text-gray-600" style="margin-top: 0.25rem; margin-bottom: 0;">${t('showOnlyCheckedSystemsDescription')}</p>
+        </div>
+      </div>
+      
+      <div class="config-module" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1.5rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">${t('languageSettings')}</h3>
+        <div class="form-group">
+          <label for="languageSelect">${t('selectLanguage')}</label>
+          <select id="languageSelect" onchange="changeLanguage(this.value)" style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 0.25rem;">
+            <option value="en">${t('english')}</option>
+            <option value="es">${t('spanish')}</option>
+          </select>
         </div>
       </div>
       
       <div class="config-module" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem;">
-        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">About</h3>
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">${t('about')}</h3>
         <div class="form-group">
-          <p class="text-sm text-gray-700">Waldorf Access Manager v1.0.0</p>
-          <p class="text-sm text-gray-600">A system for managing employee access to hotel systems and applications.</p>
+          <p class="text-sm text-gray-700">${t('appVersion')}</p>
+          <p class="text-sm text-gray-600">${t('appDescription')}</p>
         </div>
       </div>
     </div>
@@ -804,6 +836,10 @@ function renderConfiguration() {
 function loadConfiguration() {
   const onlyCheckedSystems = localStorage.getItem('onlyCheckedSystems') === 'true';
   document.getElementById('onlyCheckedSystems').checked = onlyCheckedSystems;
+  
+  // Load language setting
+  const currentLanguage = translationService.getCurrentLanguage();
+  document.getElementById('languageSelect').value = currentLanguage;
 }
 
 // Save configuration to localStorage
@@ -813,11 +849,17 @@ function saveConfiguration() {
   console.log('Configuration saved:', { onlyCheckedSystems });
 }
 
+// Change language function
+function changeLanguage(lang) {
+  translationService.setLanguage(lang);
+  console.log('Language changed to:', lang);
+}
+
 function updatePositionDropdown() {
   const deptName = document.getElementById('empDept').value;
   const posSelect = document.getElementById('empPos');
   
-  posSelect.innerHTML = '<option value="">Select Position</option>'; // Clear existing options
+  posSelect.innerHTML = `<option value="">${t('selectPosition')}</option>`; // Clear existing options
   
   if (deptName) {
     const dept = data.departments.find(d => d.name === deptName);
@@ -850,13 +892,13 @@ async function generateForm() {
 
     // Validate required fields
     if (!userData.name || !userData.department || !userData.position) {
-      await window.electronAPI.showAlertDialog('Please fill in all required fields: Name, Department, and Position.');
+      await window.electronAPI.showAlertDialog(t('pleaseFillRequiredFields'));
       return;
     }
 
     // Show loading state
     const statusDiv = document.getElementById('formStatus');
-    statusDiv.innerHTML = '<p class="text-blue-600">Generating form...</p>';
+    statusDiv.innerHTML = `<p class="text-blue-600">${t('generatingForm')}</p>`;
     document.getElementById('formOutput').style.display = 'block';
 
     // Generate form via main process with options
@@ -864,8 +906,8 @@ async function generateForm() {
 
     if (result.success) {
       statusDiv.innerHTML = `
-        <p class="text-green-600">✅ Form generated successfully!</p>
-        <p class="text-sm text-gray-600">File: ${result.filename}</p>
+        <p class="text-green-600">${t('formGeneratedSuccessfully')}</p>
+        <p class="text-sm text-gray-600">${t('file')}: ${result.filename}</p>
       `;
       
       // Store the generated file path for later use
@@ -873,13 +915,15 @@ async function generateForm() {
       
       // Reload the forms list
       loadGeneratedForms();
+      // Update translations after rendering
+      translationService.updateUI();
     } else {
-      statusDiv.innerHTML = `<p class="text-red-600">❌ Error: ${result.error}</p>`;
+      statusDiv.innerHTML = `<p class="text-red-600">${t('errorGeneratingForm', { error: result.error })}</p>`;
     }
   } catch (error) {
     console.error('Error generating form:', error);
     const statusDiv = document.getElementById('formStatus');
-    statusDiv.innerHTML = `<p class="text-red-600">❌ Error: ${error.message}</p>`;
+    statusDiv.innerHTML = `<p class="text-red-600">${t('errorGeneratingForm', { error: error.message })}</p>`;
   }
 }
 
@@ -887,7 +931,7 @@ async function openGeneratedForm() {
   if (window.lastGeneratedForm) {
     await window.electronAPI.openGeneratedFile(window.lastGeneratedForm);
   } else {
-    await window.electronAPI.showAlertDialog('No form has been generated yet.');
+    await window.electronAPI.showAlertDialog(t('noFormGeneratedYet'));
   }
 }
 
@@ -901,7 +945,7 @@ async function loadGeneratedForms() {
     const formsListContent = document.getElementById('formsListContent');
     
     if (forms.length === 0) {
-      formsListContent.innerHTML = '<p class="text-gray-500">No forms generated yet.</p>';
+      formsListContent.innerHTML = `<p class="text-gray-500">${t('noFormsGeneratedYet')}</p>`;
       return;
     }
 
@@ -913,11 +957,11 @@ async function loadGeneratedForms() {
         <table class="w-full border-collapse border border-gray-300">
           <thead>
             <tr class="bg-gray-50">
-              <th class="border border-gray-300 px-4 py-2 text-left">Employee</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">Department</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">Position</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">Generated</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">Actions</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">${t('employee')}</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">${t('department')}</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">${t('position')}</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">${t('generated')}</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">${t('actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -928,7 +972,7 @@ async function loadGeneratedForms() {
                 <td class="border border-gray-300 px-4 py-2">${form.position}</td>
                 <td class="border border-gray-300 px-4 py-2">${new Date(form.generatedAt).toLocaleString('es-CR')}</td>
                 <td class="border border-gray-300 px-4 py-2">
-                  <button class="btn btn-sm btn-primary" onclick="window.electronAPI.openGeneratedFile('${form.filename}')">Open</button>
+                  <button class="btn btn-sm btn-primary" onclick="window.electronAPI.openGeneratedFile('${form.filename}')">${t('open')}</button>
                 </td>
               </tr>
             `).join('')}
@@ -936,7 +980,7 @@ async function loadGeneratedForms() {
         </table>
         ${forms.length > 5 ? `
           <div class="mt-4">
-            <button class="btn btn-info" onclick="openFormsIndex()">View All ${forms.length} Forms</button>
+            <button class="btn btn-info" onclick="openFormsIndex()">${t('viewAllFormsCount', { count: forms.length })}</button>
           </div>
         ` : ''}
       </div>
@@ -944,7 +988,7 @@ async function loadGeneratedForms() {
   } catch (error) {
     console.error('Error loading generated forms:', error);
     document.getElementById('formsListContent').innerHTML =
-      '<p class="text-red-600">Error loading forms list.</p>';
+      `<p class="text-red-600">${t('errorLoadingFormsList')}</p>`;
   }
 }
 
@@ -954,11 +998,13 @@ function updateBreadcrumb(items) {
   breadcrumb.innerHTML = items.map((item, index) => {
     const isLast = index === items.length - 1;
     const isFirst = index === 0;
+    // Use translation for the first item (Departments) if it's the first breadcrumb
+    const displayText = isFirst && item === 'Departments' ? t('departments') : item;
     return `
       ${index > 0 ? '<span style="color: #6c757d; margin: 0 5px;">/</span>' : ''}
-      <span class="breadcrumb-item ${isLast ? 'active' : ''}" 
+      <span class="breadcrumb-item ${isLast ? 'active' : ''}"
             onclick="${isFirst ? 'showDepartments()' : index === 1 ? `showPositions(${currentDepartment.id})` : ''}">
-        ${item}
+        ${displayText}
       </span>
     `;
   }).join('');
@@ -997,4 +1043,7 @@ window.data = data;
 document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
   renderDepartments();
+  
+  // Apply translations after initial render
+  translationService.updateUI();
 });

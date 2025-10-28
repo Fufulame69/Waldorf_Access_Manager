@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hotel Access Matrix Manager</title>
+  <title data-i18n="appTitle">Hotel Access Matrix Manager</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -12,14 +12,14 @@
     <nav class="sidebar">
       <div class="sidebar-header">
         <img src="../../assets/waldorf_logo.png" alt="Waldorf Astoria" style="max-width: 100%; height: auto; margin-bottom: 10px;">
-        <h2>Hotel Access Manager</h2>
+        <h2 data-i18n="hotelAccessManager">Hotel Access Manager</h2>
       </div>
       <div class="sidebar-nav">
-        <button class="tab active" onclick="switchTab('departments')">Departments and positions</button>
-        <button class="tab" onclick="switchTab('systems')">Systems Managment</button>
+        <button class="tab active" onclick="switchTab('departments')" data-i18n="departmentsAndPositions">Departments and positions</button>
+        <button class="tab" onclick="switchTab('systems')" data-i18n="systemsManagement">Systems Managment</button>
         <!-- ADDED new tab button -->
-        <button class="tab" onclick="switchTab('formGenerator')">Form Generator</button>
-        <button class="tab" onclick="switchTab('configuration')">Configuration</button>
+        <button class="tab" onclick="switchTab('formGenerator')" data-i18n="formGenerator">Form Generator</button>
+        <button class="tab" onclick="switchTab('configuration')" data-i18n="configuration">Configuration</button>
       </div>
     </nav>
 
@@ -29,14 +29,14 @@
       <!-- Departments Tab -->
       <div id="departments" class="tab-content active">
         <div class="breadcrumb" id="breadcrumb">
-          <span class="breadcrumb-item active" onclick="showDepartments()">Departments</span>
+          <span class="breadcrumb-item active" onclick="showDepartments()" data-i18n="departments">Departments</span>
         </div>
 
         <div class="action-bar">
           <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 Search departments or positions..." onkeyup="filterItems()">
+            <input type="text" id="searchInput" data-i18n-placeholder="searchDepartmentsOrPositions" placeholder="🔍 Search departments or positions..." onkeyup="filterItems()">
           </div>
-          <button id="addDepartmentBtn" class="btn btn-primary" onclick="openModal('addDepartment')">+ Add Department</button>
+          <button id="addDepartmentBtn" class="btn btn-primary" onclick="openModal('addDepartment')" data-i18n="addDepartment">+ Add Department</button>
         </div>
 
         <div id="departmentView"></div>
@@ -47,8 +47,8 @@
       <!-- Systems Tab -->
       <div id="systems" class="tab-content">
         <div class="action-bar">
-          <h2>System Categories</h2>
-          <button class="btn btn-primary" onclick="openModal('addCategory')">+ Add Category</button>
+          <h2 data-i18n="systemCategories">System Categories</h2>
+          <button class="btn btn-primary" onclick="openModal('addCategory')" data-i18n="addCategory">+ Add Category</button>
         </div>
         <div id="systemsView"></div>
       </div>
@@ -56,7 +56,7 @@
       <!-- ADDED Form Generator Tab -->
       <div id="formGenerator" class="tab-content">
         <div class="action-bar">
-          <h2>New Employee Access Form</h2>
+          <h2 data-i18n="newEmployeeAccessForm">New Employee Access Form</h2>
         </div>
         <div id="formGeneratorView">
           <!-- Form content will be rendered here by app.js -->
@@ -66,7 +66,7 @@
       <!-- ADDED Configuration Tab -->
       <div id="configuration" class="tab-content">
         <div class="action-bar">
-          <h2>Configuration</h2>
+          <h2 data-i18n="configuration">Configuration</h2>
         </div>
         <div id="configurationView">
           <!-- Configuration content will be rendered here by app.js -->
@@ -87,9 +87,10 @@
   </div>
 
   <div class="save-indicator" id="saveIndicator">
-    ✓ Changes saved automatically
+    <span data-i18n="changesSavedAutomatically">✓ Changes saved automatically</span>
   </div>
 
+  <script src="js/translation-service.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

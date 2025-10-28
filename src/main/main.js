@@ -1,4 +1,5 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const electron = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = electron;
 const path = require('path');
 const { getDatabase, saveDatabase } = require('./firebase-service');
 const TemplateService = require('./template-service');
@@ -69,8 +70,11 @@ ipcMain.handle('generate-form', async (event, userData, options = {}) => {
     // Get the current data from Firebase
     const data = await getDatabase();
     
+    // Default to PDF generation unless explicitly disabled
+    const generateOptions = { ...options, generatePDF: options.generatePDF !== false };
+    
     // Generate the form
-    const formPath = await templateService.generateForm(data, userData, './generated-forms', options);
+    const formPath = await templateService.generateForm(data, userData, './generated-forms', generateOptions);
     
     // Read existing forms or create new array
     const formsDir = path.join(process.cwd(), 'generated-forms');
@@ -160,10 +164,18 @@ ipcMain.handle('open-generated-file', async (event, filename) => {
 
 app.on('ready', createWindow);
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
+  // Close the PDF converter service before quitting
+  await templateService.close();
+  
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('before-quit', async () => {
+  // Ensure PDF converter service is closed
+  await templateService.close();
 });
 
 app.on('activate', () => {

@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Acceso a Sistemas - A4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- Master Sizing Controls --- */
+            /* You can adjust these values to scale the entire form */
+
+            /* Typography - Reduced by 30% */
+            --text-h1: 11.1pt;
+            --text-h2: 11.15pt;
+            --text-h3: 10.45pt;
+            --text-header-subtitle: 8.75px;
+            --text-form-label: 9.45px;
+            --text-form-small: 8.05px;
+            --text-section-header: 9.45px;
+            --text-checkbox: 8.75px;
+            --text-legend: 9.35px;
+            --text-ack: 7.75px;
+            --text-obs-label: 10.45px;
+            --text-footer: 9.75px;
+            --text-footer-small: 9.05px;
+
+            /* Spacing & Gaps - Reduced by 30% */
+            --space-0-5: 0.0875rem; /* 1.4px */
+            --space-1: 0.275rem;  /* 2.8px */
+            --space-1-5: 0.4625rem; /* 4.2px */
+            --space-2: 0.55rem;   /* 5.6px */
+            --space-3: 0.625rem;  /* 8.4px */
+
+            /* Element Dimensions - Reduced by 30% */
+            --logo-height: 5.85rem; /* 61.6px */
+            --checkbox-size: 0.525rem; /* 8.4px */
+            --signature-line-height: 0.84rem;
+            
+            /* Borders - Reduced by 30% */
+            --radius-md: 0.2625rem; /* 4.2px */
+            --radius-base: 0.175rem; /* 2.8px */
+
+            /* Print Scaling */
+            --print-scale: 1;
+            --print-margin: 0.3cm;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            padding: var(--space-1);
+        }
+        .signature-line {
+            border-bottom: 1px solid #9ca3af; /* gray-400 */
+            min-height: var(--signature-line-height);
+            margin-top: var(--space-0-5);
+            padding-bottom: 1px;
+            text-align: center;
+            color: #4b5563; /* gray-600 */
+        }
+
+        /* Print-specific styles */
+        @page {
+            size: letter;
+            margin: var(--print-margin);
+        }
+
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+                -webkit-print-color-adjust: exact; /* For Chrome/Safari */
+                print-color-adjust: exact; /* Standard */
+            }
+            .printable-area {
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                transform: scale(var(--print-scale));
+                transform-origin: top left;
+            }
+            .no-print {
+                display: none;
+            }
+            /* Ensure colored headers print correctly */
+            h4 {
+                background-color: #1e3a8a !important; /* Tailwind's bg-blue-900 */
+                color: white !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    
+
+
+    <!-- Main container for the form -->
+    <div class="printable-area max-w-4xl mx-auto bg-white shadow-lg border border-gray-200" style="padding: var(--space-3); border-radius: var(--radius-md);">
+        
+        <!-- Header Section -->
+        <header class="flex flex-col sm:flex-row justify-between items-center border-b-2 border-gray-300" style="padding-bottom: var(--space-1);">
+            <div class="flex-shrink-0" style="margin-bottom: var(--space-1);">
+                <img src="data:image/png;base64,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" alt="Logo de Waldorf" style="height: var(--logo-height);">
+            </div>
+            <div class="text-center">
+                <div class="border-2 border-red-600 p-3 rounded-md">
+                    <h1 class="font-bold text-red-600" style="font-size: var(--text-h1);">IT RISK CONTROL MATRIX - Sox Compliance</h1>
+                    <p class="text-gray-500" style="font-size: var(--text-header-subtitle);">C10 - Access to critical systems and applications require user ID's and passwords.</p>
+                    <p class="text-gray-500" style="font-size: var(--text-header-subtitle);">C10 - Acceso a sistemas y aplicaciones críticas requiere el uso de ID de usuario y password únicos.</p>
+                    <h2 class="font-bold text-blue-900" style="font-size: var(--text-h2);">Solicitud de Acceso a Sistemas - Departamento de Sistemas</h2>
+                </div>
+            </div>
+        </header>
+
+        <!-- Form Section -->
+        <form style="margin-top: var(--space-1);">
+            <!-- Personal Information Section -->
+            <div class="grid grid-cols-4" style="gap: var(--space-1); font-size: var(--text-form-label); margin-bottom: var(--space-1);">
+                <div>
+                    <label for="nombre" class="font-bold text-gray-700">NOMBRE Y APELLIDO</label>
+                    <input type="text" id="nombre" value="wdwdw" class="w-full border border-gray-400 shadow-sm" style="margin-top: var(--space-0-5); border-radius: var(--radius-base); padding: var(--space-0-5);">
+                </div>
+                <div>
+                    <label for="posicion" class="font-bold text-gray-700">POSICION</label>
+                    <input type="text" id="posicion" value="Gerente de Sistemas" class="w-full border border-gray-400 shadow-sm" style="margin-top: var(--space-0-5); border-radius: var(--radius-base); padding: var(--space-0-5);">
+                </div>
+                <div>
+                    <label for="departamento" class="font-bold text-gray-700">DEPARTAMENTO</label>
+                    <input type="text" id="departamento" value="Sistemas" class="w-full border border-gray-400 shadow-sm" style="margin-top: var(--space-0-5); border-radius: var(--radius-base); padding: var(--space-0-5);">
+                </div>
+                <div>
+                    <label for="fecha_ingreso" class="font-bold text-gray-700">Fecha Ingreso</label>
+                    <input type="text" id="fecha_ingreso" value="2025-10-28" class="w-full border border-gray-400 shadow-sm bg-gray-100" style="margin-top: var(--space-0-5); border-radius: var(--radius-base); padding: var(--space-0-5);">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2" style="gap: var(--space-1); font-size: var(--text-form-label); margin-bottom: var(--space-1);">
+                 <div>
+                    <label for="idm_login" class="font-bold text-gray-700">IDM Login Name</label>
+                    <input type="text" id="idm_login" value="dwdw" class="w-full border border-gray-400 shadow-sm" style="margin-top: var(--space-0-5); border-radius: var(--radius-base); padding: var(--space-0-5);">
+                    <p class="text-gray-500 italic" style="font-size: var(--text-form-small);">Solo para uso de computacion</p>
+                </div>
+                <div>
+                    <label for="email" class="font-bold text-gray-700">Email Account</label>
+                    <input type="email" id="email" value="dwdw" class="w-full border border-gray-400 shadow-sm" style="margin-top: var(--space-0-5); border-radius: var(--radius-base); padding: var(--space-0-5);">
+                </div>
+            </div>
+
+            <!-- Systems Sections -->
+            <div class="space-y-1">
+                
+                <!-- ONQ Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">ONQ</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="email_mobile" name="permissions" value="eMail Mobile" style="margin-right: var(--space-1);">
+          <label for="email_mobile">eMail Mobile</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="onq_admin" name="permissions" value="OnQ Admin" style="margin-right: var(--space-1);">
+          <label for="onq_admin">OnQ Admin</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="onq_r_i" name="permissions" value="OnQ R&I" style="margin-right: var(--space-1);">
+          <label for="onq_r_i">OnQ R&I</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="onq_r_m" name="permissions" value="OnQ R&M" style="margin-right: var(--space-1);">
+          <label for="onq_r_m">OnQ R&M</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="onq_user" name="permissions" value="OnQ User" style="margin-right: var(--space-1);">
+          <label for="onq_user">OnQ User</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="email" name="permissions" value="Email" style="margin-right: var(--space-1);">
+          <label for="email">Email</label>
+        </div>
+                    </div>
+                </div>
+                <!-- OPERA PMS Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">OPERA PMS</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="finance_manager" name="permissions" value="Finance Manager" style="margin-right: var(--space-1);">
+          <label for="finance_manager">Finance Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="security" name="permissions" value="Security" style="margin-right: var(--space-1);">
+          <label for="security">Security</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="finance_supervisor" name="permissions" value="Finance Supervisor" style="margin-right: var(--space-1);">
+          <label for="finance_supervisor">Finance Supervisor</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="a_r_manager" name="permissions" value="A/R Manager" style="margin-right: var(--space-1);">
+          <label for="a_r_manager">A/R Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="income_auditor" name="permissions" value="Income Auditor" style="margin-right: var(--space-1);">
+          <label for="income_auditor">Income Auditor</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="a_r_clerk" name="permissions" value="A/R Clerk" style="margin-right: var(--space-1);">
+          <label for="a_r_clerk">A/R Clerk</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="fo_manager" name="permissions" value="FO Manager" style="margin-right: var(--space-1);">
+          <label for="fo_manager">FO Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="night_auditor" name="permissions" value="Night Auditor" style="margin-right: var(--space-1);">
+          <label for="night_auditor">Night Auditor</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="night_manager" name="permissions" value="Night Manager" style="margin-right: var(--space-1);">
+          <label for="night_manager">Night Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="fd_supervisor" name="permissions" value="FD Supervisor" style="margin-right: var(--space-1);">
+          <label for="fd_supervisor">FD Supervisor</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="fd_agent" name="permissions" value="FD Agent" style="margin-right: var(--space-1);">
+          <label for="fd_agent">FD Agent</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="concierge" name="permissions" value="Concierge" style="margin-right: var(--space-1);">
+          <label for="concierge">Concierge</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="bell_man" name="permissions" value="Bell Man" style="margin-right: var(--space-1);">
+          <label for="bell_man">Bell Man</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="executive_housekeeper" name="permissions" value="Executive Housekeeper" style="margin-right: var(--space-1);">
+          <label for="executive_housekeeper">Executive Housekeeper</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="housekeeping_supervisor" name="permissions" value="Housekeeping Supervisor" style="margin-right: var(--space-1);">
+          <label for="housekeeping_supervisor">Housekeeping Supervisor</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="housekeeping_attend" name="permissions" value="Housekeeping Attend" style="margin-right: var(--space-1);">
+          <label for="housekeeping_attend">Housekeeping Attend</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="revenue_manager" name="permissions" value="Revenue Manager" style="margin-right: var(--space-1);">
+          <label for="revenue_manager">Revenue Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="reservation_supervisor" name="permissions" value="Reservation Supervisor" style="margin-right: var(--space-1);">
+          <label for="reservation_supervisor">Reservation Supervisor</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="reservation_agent" name="permissions" value="Reservation Agent" style="margin-right: var(--space-1);">
+          <label for="reservation_agent">Reservation Agent</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="groups_ce_manager" name="permissions" value="Groups & CE Manager" style="margin-right: var(--space-1);">
+          <label for="groups_ce_manager">Groups & CE Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="sales_manager" name="permissions" value="Sales Manager" style="margin-right: var(--space-1);">
+          <label for="sales_manager">Sales Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="sales" name="permissions" value="Sales" style="margin-right: var(--space-1);">
+          <label for="sales">Sales</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="telephone_supervisor" name="permissions" value="Telephone Supervisor" style="margin-right: var(--space-1);">
+          <label for="telephone_supervisor">Telephone Supervisor</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="telephone_operator" name="permissions" value="Telephone Operator" style="margin-right: var(--space-1);">
+          <label for="telephone_operator">Telephone Operator</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="ism" name="permissions" value="ISM" style="margin-right: var(--space-1);">
+          <label for="ism">ISM</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="property_expert" name="permissions" value="Property Expert" style="margin-right: var(--space-1);">
+          <label for="property_expert">Property Expert</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="opera_supervisor" name="permissions" value="Opera Supervisor" style="margin-right: var(--space-1);">
+          <label for="opera_supervisor">Opera Supervisor</label>
+        </div>
+                    </div>
+                </div>
+                <!-- BIRCH STREET Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">BIRCH STREET</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="general_manager" name="permissions" value="General Manager" style="margin-right: var(--space-1);">
+          <label for="general_manager">General Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="director_of_finance" name="permissions" value="Director of Finance" style="margin-right: var(--space-1);">
+          <label for="director_of_finance">Director of Finance</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="accounts_payable" name="permissions" value="Accounts Payable" style="margin-right: var(--space-1);">
+          <label for="accounts_payable">Accounts Payable</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="dir_of_pur" name="permissions" value="Dir Of Pur" style="margin-right: var(--space-1);">
+          <label for="dir_of_pur">Dir Of Pur</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="storeroom_receiver" name="permissions" value="Storeroom/Receiver" style="margin-right: var(--space-1);">
+          <label for="storeroom_receiver">Storeroom/Receiver</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="po_req_selectdepts" name="permissions" value="PO/REQ/SelectDepts" style="margin-right: var(--space-1);">
+          <label for="po_req_selectdepts">PO/REQ/SelectDepts</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="po_aprv_req_selectdepts" name="permissions" value="PO/APRV/REQ/SelectDepts" style="margin-right: var(--space-1);">
+          <label for="po_aprv_req_selectdepts">PO/APRV/REQ/SelectDepts</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="it_manager" name="permissions" value="IT Manager" style="margin-right: var(--space-1);">
+          <label for="it_manager">IT Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="po_req_selectdepts_recv_aprv" name="permissions" value="PO/REQ/SelectDepts/Recv/APRV" style="margin-right: var(--space-1);">
+          <label for="po_req_selectdepts_recv_aprv">PO/REQ/SelectDepts/Recv/APRV</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="cost_controller_accounts_payable" name="permissions" value="Cost Controller/ Accounts Payable" style="margin-right: var(--space-1);">
+          <label for="cost_controller_accounts_payable">Cost Controller/ Accounts Payable</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11102" name="permissions" value="11102" style="margin-right: var(--space-1);">
+          <label for="11102">11102</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11121" name="permissions" value="11121" style="margin-right: var(--space-1);">
+          <label for="11121">11121</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11130" name="permissions" value="11130" style="margin-right: var(--space-1);">
+          <label for="11130">11130</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11160" name="permissions" value="11160" style="margin-right: var(--space-1);">
+          <label for="11160">11160</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11171" name="permissions" value="11171" style="margin-right: var(--space-1);">
+          <label for="11171">11171</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11725" name="permissions" value="11725" style="margin-right: var(--space-1);">
+          <label for="11725">11725</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11720" name="permissions" value="11720" style="margin-right: var(--space-1);">
+          <label for="11720">11720</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11700" name="permissions" value="11700" style="margin-right: var(--space-1);">
+          <label for="11700">11700</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11730" name="permissions" value="11730" style="margin-right: var(--space-1);">
+          <label for="11730">11730</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11735" name="permissions" value="11735" style="margin-right: var(--space-1);">
+          <label for="11735">11735</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11745" name="permissions" value="11745" style="margin-right: var(--space-1);">
+          <label for="11745">11745</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11731" name="permissions" value="11731" style="margin-right: var(--space-1);">
+          <label for="11731">11731</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11705" name="permissions" value="11705" style="margin-right: var(--space-1);">
+          <label for="11705">11705</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11001" name="permissions" value="11001" style="margin-right: var(--space-1);">
+          <label for="11001">11001</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11264" name="permissions" value="11264" style="margin-right: var(--space-1);">
+          <label for="11264">11264</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11249" name="permissions" value="11249" style="margin-right: var(--space-1);">
+          <label for="11249">11249</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11250" name="permissions" value="11250" style="margin-right: var(--space-1);">
+          <label for="11250">11250</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="11101" name="permissions" value="11101" style="margin-right: var(--space-1);">
+          <label for="11101">11101</label>
+        </div>
+                    </div>
+                </div>
+                <!-- NOMINA & CONTROL DE TIEMPO Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">NOMINA & CONTROL DE TIEMPO</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="administrador_monolith" name="permissions" value="Administrador Monolith" style="margin-right: var(--space-1);">
+          <label for="administrador_monolith">Administrador Monolith</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="gerente_reg_acciones" name="permissions" value="Gerente Reg Acciones" style="margin-right: var(--space-1);">
+          <label for="gerente_reg_acciones">Gerente Reg Acciones</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="gerente_reloj_marcador" name="permissions" value="Gerente reloj marcador" style="margin-right: var(--space-1);">
+          <label for="gerente_reloj_marcador">Gerente reloj marcador</label>
+        </div>
+                    </div>
+                </div>
+                <!-- SIMPHONY Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">SIMPHONY</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="emc" name="permissions" value="EMC" style="margin-right: var(--space-1);">
+          <label for="emc">EMC</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="reporting_and_analytics" name="permissions" value="Reporting and Analytics" style="margin-right: var(--space-1);">
+          <label for="reporting_and_analytics">Reporting and Analytics</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="tarjeta_pos" name="permissions" value="Tarjeta POS" style="margin-right: var(--space-1);">
+          <label for="tarjeta_pos">Tarjeta POS</label>
+        </div>
+                        <div class="flex items-center">
+          <input type="checkbox" id="server" name="permissions" value="Server" style="margin-right: var(--space-1);">
+          <label for="server">Server</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="bartender" name="permissions" value="Bartender" style="margin-right: var(--space-1);">
+          <label for="bartender">Bartender</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="in_room_dining" name="permissions" value="In Room Dining" style="margin-right: var(--space-1);">
+          <label for="in_room_dining">In Room Dining</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="cashier" name="permissions" value="Cashier" style="margin-right: var(--space-1);">
+          <label for="cashier">Cashier</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="cashier_discount" name="permissions" value="Cashier/ Discount" style="margin-right: var(--space-1);">
+          <label for="cashier_discount">Cashier/ Discount</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="supervisor" name="permissions" value="Supervisor" style="margin-right: var(--space-1);">
+          <label for="supervisor">Supervisor</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="manager" name="permissions" value="Manager" style="margin-right: var(--space-1);">
+          <label for="manager">Manager</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="property_expert" name="permissions" value="Property Expert" style="margin-right: var(--space-1);">
+          <label for="property_expert">Property Expert</label>
+        </div>
+                    </div>
+                </div>
+                <!-- FINANZAS Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">FINANZAS</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="sun" name="permissions" value="SUN" style="margin-right: var(--space-1);">
+          <label for="sun">SUN</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="bmqa" name="permissions" value="BMQA" style="margin-right: var(--space-1);">
+          <label for="bmqa">BMQA</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="operations_audit" name="permissions" value="Operations Audit" style="margin-right: var(--space-1);">
+          <label for="operations_audit">Operations Audit</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="datalink" name="permissions" value="DataLink" style="margin-right: var(--space-1);">
+          <label for="datalink">DataLink</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="blackline" name="permissions" value="Blackline" style="margin-right: var(--space-1);">
+          <label for="blackline">Blackline</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="proplan" name="permissions" value="PROPLAN" style="margin-right: var(--space-1);">
+          <label for="proplan">PROPLAN</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="fms" name="permissions" value="FMS" style="margin-right: var(--space-1);">
+          <label for="fms">FMS</label>
+        </div>
+                    </div>
+                </div>
+                <!-- FAC. ELEC. Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">FAC. ELEC.</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="finanzas" name="permissions" value="Finanzas" style="margin-right: var(--space-1);">
+          <label for="finanzas">Finanzas</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="recepcion" name="permissions" value="Recepcion" style="margin-right: var(--space-1);">
+          <label for="recepcion">Recepcion</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="administrador" name="permissions" value="Administrador" style="margin-right: var(--space-1);">
+          <label for="administrador">Administrador</label>
+        </div>
+                    </div>
+                </div>
+                <!-- MISCELANEOS Y DELPHI Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">MISCELANEOS Y DELPHI</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="avero" name="permissions" value="Avero" style="margin-right: var(--space-1);">
+          <label for="avero">Avero</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="synergymms" name="permissions" value="Synergymms" style="margin-right: var(--space-1);">
+          <label for="synergymms">Synergymms</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="kualtrix" name="permissions" value="KUALTRIX" style="margin-right: var(--space-1);">
+          <label for="kualtrix">KUALTRIX</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="trayaway" name="permissions" value="TRAYAWAY" style="margin-right: var(--space-1);">
+          <label for="trayaway">TRAYAWAY</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="kypsu" name="permissions" value="KYPSU" style="margin-right: var(--space-1);">
+          <label for="kypsu">KYPSU</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="wiq" name="permissions" value="WIQ" style="margin-right: var(--space-1);">
+          <label for="wiq">WIQ</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="alice" name="permissions" value="ALICE" style="margin-right: var(--space-1);">
+          <label for="alice">ALICE</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="adobe" name="permissions" value="ADOBE" style="margin-right: var(--space-1);">
+          <label for="adobe">ADOBE</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="foxit" name="permissions" value="FOXIT" style="margin-right: var(--space-1);">
+          <label for="foxit">FOXIT</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="owner_rlt" name="permissions" value="OWNER RLT" style="margin-right: var(--space-1);">
+          <label for="owner_rlt">OWNER RLT</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="bms" name="permissions" value="BMS" style="margin-right: var(--space-1);">
+          <label for="bms">BMS</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="zennio" name="permissions" value="ZENNIO" style="margin-right: var(--space-1);">
+          <label for="zennio">ZENNIO</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="pressreader" name="permissions" value="PRESSREADER" style="margin-right: var(--space-1);">
+          <label for="pressreader">PRESSREADER</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="sertify" name="permissions" value="SERTIFY" style="margin-right: var(--space-1);">
+          <label for="sertify">SERTIFY</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="book4time" name="permissions" value="BOOK4TIME" style="margin-right: var(--space-1);">
+          <label for="book4time">BOOK4TIME</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="opentable" name="permissions" value="OPENTABLE" style="margin-right: var(--space-1);">
+          <label for="opentable">OPENTABLE</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="vision_line" name="permissions" value="VISION LINE" style="margin-right: var(--space-1);">
+          <label for="vision_line">VISION LINE</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="op_audi" name="permissions" value="OP AUDI" style="margin-right: var(--space-1);">
+          <label for="op_audi">OP AUDI</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="reports" name="permissions" value="Reports" style="margin-right: var(--space-1);">
+          <label for="reports">Reports</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="cloudflare" name="permissions" value="Cloudflare" style="margin-right: var(--space-1);">
+          <label for="cloudflare">Cloudflare</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="sinergy_mms" name="permissions" value="Sinergy MMS" style="margin-right: var(--space-1);">
+          <label for="sinergy_mms">Sinergy MMS</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="vantage" name="permissions" value="Vantage" style="margin-right: var(--space-1);">
+          <label for="vantage">Vantage</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="delphi" name="permissions" value="Delphi" style="margin-right: var(--space-1);">
+          <label for="delphi">Delphi</label>
+        </div>
+                    </div>
+                </div>
+                <!-- GRUPOS Section -->
+                <div class="border border-gray-300" style="border-radius: var(--radius-md);">
+                    <h4 class="bg-blue-900 text-white text-center font-bold rounded-t-md" style="padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); font-size: var(--text-section-header);">GRUPOS</h4>
+                    <div class="flex flex-wrap" style="padding: var(--space-1-5); column-gap: var(--space-1); row-gap: var(--space-0-5); font-size: var(--text-checkbox);">
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="eng" name="permissions" value="ENG" style="margin-right: var(--space-1);">
+          <label for="eng">ENG</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="sox" name="permissions" value="SOX" style="margin-right: var(--space-1);">
+          <label for="sox">SOX</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="pr" name="permissions" value="PR" style="margin-right: var(--space-1);">
+          <label for="pr">PR</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="hc" name="permissions" value="HC" style="margin-right: var(--space-1);">
+          <label for="hc">HC</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="oa" name="permissions" value="OA" style="margin-right: var(--space-1);">
+          <label for="oa">OA</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="cb" name="permissions" value="CB" style="margin-right: var(--space-1);">
+          <label for="cb">CB</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="fb" name="permissions" value="FB" style="margin-right: var(--space-1);">
+          <label for="fb">FB</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="fc" name="permissions" value="FC" style="margin-right: var(--space-1);">
+          <label for="fc">FC</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="fo" name="permissions" value="FO" style="margin-right: var(--space-1);">
+          <label for="fo">FO</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="hrd" name="permissions" value="HRD" style="margin-right: var(--space-1);">
+          <label for="hrd">HRD</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="hsk" name="permissions" value="HSK" style="margin-right: var(--space-1);">
+          <label for="hsk">HSK</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="ism" name="permissions" value="ISM" style="margin-right: var(--space-1);">
+          <label for="ism">ISM</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="kit" name="permissions" value="KIT" style="margin-right: var(--space-1);">
+          <label for="kit">KIT</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="mkt" name="permissions" value="MKT" style="margin-right: var(--space-1);">
+          <label for="mkt">MKT</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="pur" name="permissions" value="PUR" style="margin-right: var(--space-1);">
+          <label for="pur">PUR</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="res" name="permissions" value="RES" style="margin-right: var(--space-1);">
+          <label for="res">RES</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="sal" name="permissions" value="SAL" style="margin-right: var(--space-1);">
+          <label for="sal">SAL</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="sec" name="permissions" value="SEC" style="margin-right: var(--space-1);">
+          <label for="sec">SEC</label>
+        </div>
+                        <div class="flex items-center">
+          <input checked type="checkbox" id="hod" name="permissions" value="HOD" style="margin-right: var(--space-1);">
+          <label for="hod">HOD</label>
+        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acknowledgement & Observations -->
+            <div style="padding-top: var(--space-1); font-size: var(--text-ack);">
+                <div class="flex items-start">
+                    <input type="checkbox" id="ack" class="flex-shrink-0" style="margin-top: var(--space-0-5); margin-right: var(--space-1); height: var(--checkbox-size); width: var(--checkbox-size);">
+                    <label for="ack" class="text-gray-700 leading-tight">
+                        Yo, wdwdw, he entendido y reconozco la responsabilidad de mi login name y password, así como también recibí y acepté el contenido de Las Políticas de seguridad de la información (HWI-IT-001).
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3" style="padding-top: var(--space-0-5); gap: var(--space-1);">
+                <div class="col-span-2">
+                    <label for="observaciones" class="font-bold text-gray-700" style="font-size: var(--text-obs-label);">Observaciones:</label>
+                    <textarea id="observaciones" rows="1" class="w-full border border-gray-400 shadow-sm" style="margin-top: var(--space-0-5); border-radius: var(--radius-base); padding: var(--space-0-5); font-size: var(--text-obs-label);"></textarea>
+                </div>
+                <div class="flex flex-col justify-end" style="font-size: var(--text-obs-label); gap: var(--space-0-5);">
+                    <div class="flex items-center"><input type="checkbox" id="laptop_pc" name="device" value="Laptop / PC" style="margin-right: var(--space-1);">Laptop / PC</div>
+                    <div class="flex items-center"><input type="checkbox" id="celular" name="device" value="Celular" style="margin-right: var(--space-1);">Celular</div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Signature Section -->
+        <footer class="border-t border-gray-300" style="margin-top: var(--space-2); padding-top: var(--space-2);">
+            <div class="grid grid-cols-5" style="gap: var(--space-2); font-size: var(--text-footer);">
+                <div class="text-center">
+                    <p class="font-semibold text-gray-700">Usuario</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <div class="signature-line"></div>
+                    <p class="text-gray-500" style="margin-top: var(--space-0-5); font-size: var(--text-footer-small);">Fecha</p>
+                    <input type="text" class="w-full border border-gray-400 shadow-sm mt-1" style="border-radius: var(--radius-base); padding: 2px; font-size: var(--text-footer-small);">
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold text-gray-700">Solicitado por Lider Departamento</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <div class="signature-line"></div>
+                    <p class="text-gray-500" style="margin-top: var(--space-0-5); font-size: var(--text-footer-small);">Fecha</p>
+                    <input type="text" class="w-full border border-gray-400 shadow-sm mt-1" style="border-radius: var(--radius-base); padding: 2px; font-size: var(--text-footer-small);">
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold text-gray-700">Aprobador por Recursos Humanos</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <div class="signature-line"></div>
+                    <p class="text-gray-500" style="margin-top: var(--space-0-5); font-size: var(--text-footer-small);">Fecha</p>
+                    <input type="text" class="w-full border border-gray-400 shadow-sm mt-1" style="border-radius: var(--radius-base); padding: 2px; font-size: var(--text-footer-small);">
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold text-gray-700">Aprobador por Finanzas</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <div class="signature-line"></div>
+                    <p class="text-gray-500" style="margin-top: var(--space-0-5); font-size: var(--text-footer-small);">Fecha</p>
+                    <input type="text" class="w-full border border-gray-400 shadow-sm mt-1" style="border-radius: var(--radius-base); padding: 2px; font-size: var(--text-footer-small);">
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold text-gray-700">Accesos Generados Por IT</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <p class="font-semibold text-white">bl</p>
+                    <div class="signature-line"></div>
+                    <p class="text-gray-500" style="margin-top: var(--space-0-5); font-size: var(--text-footer-small);">Fecha</p>
+                    <input type="text" class="w-full border border-gray-400 shadow-sm mt-1" style="border-radius: var(--radius-base); padding: 2px; font-size: var(--text-footer-small);">
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

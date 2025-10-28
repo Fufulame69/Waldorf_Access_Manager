@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
+const PDFConverterService = require('./pdf-converter-service');
 
 /**
  * Service for hydrating HTML templates with user data and permissions
@@ -7,6 +8,7 @@ const path = require('path');
 class TemplateService {
   constructor() {
     this.templatePath = path.join(__dirname, '../templates/solicitud_template.html');
+    this.pdfConverter = new PDFConverterService();
   }
 
   /**
@@ -212,6 +214,7 @@ class TemplateService {
    * @param {string} outputDir - Output directory path
    * @param {Object} options - Configuration options
    * @param {boolean} options.onlyCheckedSystems - Whether to only show checked systems
+   * @param {boolean} options.generatePDF - Whether to generate PDF instead of HTML (default: true)
    * @returns {Promise<string>} Path to the generated file
    */
   async generateForm(data, userData, outputDir = './generated-forms', options = {}) {
@@ -222,20 +225,68 @@ class TemplateService {
       // Generate filename based on user name and timestamp
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const sanitizedName = (userData.name || 'unknown').replace(/[^a-zA-Z0-9]/g, '_');
-      const filename = `solicitud_${sanitizedName}_${timestamp}.html`;
+      const baseFilename = `solicitud_${sanitizedName}_${timestamp}`;
+      
+      // Default to PDF generation unless explicitly disabled
+      const generatePDF = options.generatePDF !== false;
+      const fileExtension = generatePDF ? '.pdf' : '.html';
+      const filename = `${baseFilename}${fileExtension}`;
       const filePath = path.join(outputDir, filename);
 
       // Hydrate the template with options
-      const hydratedContent = await this.hydrateTemplate(data, userData, options);
+      let hydratedContent = await this.hydrateTemplate(data, userData, options);
 
-      // Write the file
-      await fs.writeFile(filePath, hydratedContent, 'utf8');
+      if (generatePDF) {
+        // For PDF generation, we need to convert relative image paths to absolute paths
+        const logoPath = path.resolve(__dirname, '../../assets/waldorf_logo.png');
+        const logoBase64 = await this.imageToBase64(logoPath);
+        hydratedContent = hydratedContent.replace(
+          '../assets/waldorf_logo.png',
+          `data:image/png;base64,${logoBase64}`
+        );
 
-      console.log(`Form generated successfully: ${filePath}`);
+        // Convert HTML to PDF
+        await this.pdfConverter.convertHTMLToPDF(hydratedContent, filePath, {
+          format: 'Letter',
+          printBackground: true,
+          margin: {
+            top: '0.3cm',
+            right: '0.3cm',
+            bottom: '0.3cm',
+            left: '0.3cm'
+          }
+        });
+        
+        // Also save the HTML file for reference (optional)
+        const htmlFilePath = path.join(outputDir, `${baseFilename}.html`);
+        await fs.writeFile(htmlFilePath, hydratedContent, 'utf8');
+        
+        console.log(`PDF form generated successfully: ${filePath}`);
+      } else {
+        // Write the HTML file
+        await fs.writeFile(filePath, hydratedContent, 'utf8');
+        console.log(`HTML form generated successfully: ${filePath}`);
+      }
+
       return filePath;
     } catch (error) {
       console.error('Error generating form:', error);
       throw new Error(`Failed to generate form: ${error.message}`);
+    }
+  }
+
+  /**
+   * Convert an image file to base64 string
+   * @param {string} imagePath - Path to the image file
+   * @returns {Promise<string>} Base64 encoded image
+   */
+  async imageToBase64(imagePath) {
+    try {
+      const imageBuffer = await fs.readFile(imagePath);
+      return imageBuffer.toString('base64');
+    } catch (error) {
+      console.warn('Could not convert image to base64:', error);
+      return '';
     }
   }
 
@@ -277,7 +328,7 @@ class TemplateService {
         <main>
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold mb-4">Lista de Formularios</h2>
-                ${forms.length === 0 ? 
+                ${forms.length === 0 ?
                     '<p class="text-gray-500">No hay formularios generados aún.</p>' :
                     `<div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -291,17 +342,24 @@ class TemplateService {
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                ${forms.map(form => `
+                                ${forms.map(form => {
+                                    const isPDF = form.filename.endsWith('.pdf');
+                                    const linkText = isPDF ? 'Ver PDF' : 'Ver Formulario';
+                                    const linkClass = isPDF ? 'text-red-600 hover:text-red-900' : 'text-blue-600 hover:text-blue-900';
+                                    
+                                    return `
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${form.name}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${form.department}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${form.position}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(form.generatedAt).toLocaleString('es-CR')}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="${form.filename}" target="_blank" class="text-blue-600 hover:text-blue-900">Ver Formulario</a>
+                                            <a href="${form.filename}" target="_blank" class="${linkClass}">${linkText}</a>
+                                            ${isPDF ? `<span class="ml-2 text-xs text-gray-500">(PDF)</span>` : ''}
                                         </td>
                                     </tr>
-                                `).join('')}
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>`
@@ -323,6 +381,13 @@ class TemplateService {
       console.error('Error generating index:', error);
       throw new Error(`Failed to generate index: ${error.message}`);
     }
+  }
+  /**
+   * Close the PDF converter service
+   * Should be called when the application is closing
+   */
+  async close() {
+    await this.pdfConverter.close();
   }
 }
 
