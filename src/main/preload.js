@@ -15,5 +15,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Form generation operations
   generateForm: (userData, options) => ipcRenderer.invoke('generate-form', userData, options),
   getGeneratedForms: () => ipcRenderer.invoke('get-generated-forms'),
-  openGeneratedFile: (filename) => ipcRenderer.invoke('open-generated-file', filename)
+  openGeneratedFile: (filename) => ipcRenderer.invoke('open-generated-file', filename),
+  openEmployeeFolder: (employeeName) => ipcRenderer.invoke('open-employee-folder', employeeName),
+  
+  // Cleanup operations
+  cleanupLeftoverFiles: (options) => ipcRenderer.invoke('cleanup-leftover-files', options),
+  cleanupOldFiles: (options) => ipcRenderer.invoke('cleanup-old-files', options)
 });

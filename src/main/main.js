@@ -74,7 +74,7 @@ ipcMain.handle('generate-form', async (event, userData, options = {}) => {
     const generateOptions = { ...options, generatePDF: options.generatePDF !== false };
     
     // Generate the form
-    const formPath = await templateService.generateForm(data, userData, './generated-forms', generateOptions);
+    const formResults = await templateService.generateForm(data, userData, './generated-forms', generateOptions);
     
     // Read existing forms or create new array
     const formsDir = path.join(process.cwd(), 'generated-forms');
@@ -88,16 +88,29 @@ ipcMain.handle('generate-form', async (event, userData, options = {}) => {
       // File doesn't exist, start with empty array
     }
     
-    // Add new form to the list
-    const newForm = {
+    // Add both solicitud and checklist forms to the list
+    const solicitudFilename = path.basename(formResults.solicitud);
+    const checklistFilename = path.basename(formResults.checklist);
+    
+    const solicitudForm = {
       name: userData.name,
       department: userData.department,
       position: userData.position,
-      filename: path.basename(formPath),
+      filename: solicitudFilename,
+      type: 'solicitud',
       generatedAt: new Date().toISOString()
     };
     
-    forms.push(newForm);
+    const checklistForm = {
+      name: userData.name,
+      department: userData.department,
+      position: userData.position,
+      filename: checklistFilename,
+      type: 'checklist',
+      generatedAt: new Date().toISOString()
+    };
+    
+    forms.push(solicitudForm, checklistForm);
     
     // Keep only last 50 forms to prevent the file from getting too large
     if (forms.length > 50) {
@@ -113,9 +126,10 @@ ipcMain.handle('generate-form', async (event, userData, options = {}) => {
     
     return {
       success: true,
-      formPath: formPath,
+      formResults: formResults,
       indexPath: indexPath,
-      filename: path.basename(formPath)
+      solicitudFilename: solicitudFilename,
+      checklistFilename: checklistFilename
     };
   } catch (error) {
     console.error('Error generating form:', error);
@@ -155,6 +169,54 @@ ipcMain.handle('open-generated-file', async (event, filename) => {
     return { success: true };
   } catch (error) {
     console.error('Error opening file:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// IPC handler for opening employee folder
+ipcMain.handle('open-employee-folder', async (event, employeeName) => {
+  try {
+    const sanitizedName = (employeeName || 'unknown').replace(/[^a-zA-Z0-9]/g, '_');
+    const folderPath = path.join(process.cwd(), 'generated-forms', sanitizedName);
+    
+    // Open the folder with the default file manager
+    const { shell } = require('electron');
+    await shell.openPath(folderPath);
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error opening employee folder:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// IPC handler for cleaning up leftover HTML files
+ipcMain.handle('cleanup-leftover-files', async (event, options = {}) => {
+  try {
+    await templateService.cleanupLeftoverFiles('./generated-forms', options);
+    return { success: true };
+  } catch (error) {
+    console.error('Error cleaning up leftover files:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// IPC handler for cleaning up old files
+ipcMain.handle('cleanup-old-files', async (event, options = {}) => {
+  try {
+    await templateService.cleanupOldFiles('./generated-forms', options);
+    return { success: true };
+  } catch (error) {
+    console.error('Error cleaning up old files:', error);
     return {
       success: false,
       error: error.message

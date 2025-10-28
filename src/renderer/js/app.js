@@ -32,7 +32,7 @@ async function loadData() {
 }
 
 // Save data to Firebase
-async function saveData() {
+async function saveData() {k
   try {
     // Update the last modified timestamp
     data.metadata.lastModified = new Date().toISOString();
@@ -818,6 +818,18 @@ function renderConfiguration() {
         </div>
       </div>
       
+      <div class="config-module" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1.5rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">${t('cleanupSettings')}</h3>
+        <div class="form-group">
+          <p class="text-sm text-gray-700" style="margin-bottom: 1rem;">${t('cleanupDescription')}</p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-warning" onclick="cleanupLeftoverFiles()">${t('cleanupLeftoverFiles')}</button>
+            <button class="btn btn-danger" onclick="cleanupOldFiles()">${t('cleanupOldFiles')}</button>
+          </div>
+          <p class="text-sm text-gray-600" style="margin-top: 0.5rem; margin-bottom: 0;">${t('cleanupNote')}</p>
+        </div>
+      </div>
+      
       <div class="config-module" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem;">
         <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600;">${t('about')}</h3>
         <div class="form-group">
@@ -906,12 +918,24 @@ async function generateForm() {
 
     if (result.success) {
       statusDiv.innerHTML = `
-        <p class="text-green-600">${t('formGeneratedSuccessfully')}</p>
-        <p class="text-sm text-gray-600">${t('file')}: ${result.filename}</p>
+        <p class="text-green-600">${t('formsGeneratedSuccessfully')}</p>
+        <p class="text-sm text-gray-600">${t('solicitudFile')}: ${result.solicitudFilename}</p>
+        <p class="text-sm text-gray-600">${t('checklistFile')}: ${result.checklistFilename}</p>
       `;
       
-      // Store the generated file path for later use
-      window.lastGeneratedForm = result.filename;
+      // Store the generated file paths for later use
+      window.lastGeneratedSolicitud = result.solicitudFilename;
+      window.lastGeneratedChecklist = result.checklistFilename;
+      window.lastEmployeeFolder = result.formResults.employeeFolder;
+      
+      // Update form actions to show both files
+      const formActionsDiv = document.querySelector('#formOutput .form-actions');
+      formActionsDiv.innerHTML = `
+        <button class="btn btn-success" onclick="openGeneratedSolicitud()">${t('openSolicitud')}</button>
+        <button class="btn btn-info" onclick="openGeneratedChecklist()">${t('openChecklist')}</button>
+        <button class="btn btn-warning" onclick="openEmployeeFolder()">${t('openEmployeeFolder')}</button>
+        <button class="btn btn-secondary" onclick="openFormsIndex()">${t('viewAllForms')}</button>
+      `;
       
       // Reload the forms list
       loadGeneratedForms();
@@ -927,9 +951,28 @@ async function generateForm() {
   }
 }
 
-async function openGeneratedForm() {
-  if (window.lastGeneratedForm) {
-    await window.electronAPI.openGeneratedFile(window.lastGeneratedForm);
+async function openGeneratedSolicitud() {
+  if (window.lastGeneratedSolicitud) {
+    await window.electronAPI.openGeneratedFile(window.lastGeneratedSolicitud);
+  } else {
+    await window.electronAPI.showAlertDialog(t('noFormGeneratedYet'));
+  }
+}
+
+async function openGeneratedChecklist() {
+  if (window.lastGeneratedChecklist) {
+    await window.electronAPI.openGeneratedFile(window.lastGeneratedChecklist);
+  } else {
+    await window.electronAPI.showAlertDialog(t('noFormGeneratedYet'));
+  }
+}
+
+async function openEmployeeFolder() {
+  if (window.lastEmployeeFolder) {
+    // Extract employee name from folder path
+    const pathParts = window.lastEmployeeFolder.split(/[/\\]/);
+    const folderName = pathParts[pathParts.length - 1];
+    await window.electronAPI.openEmployeeFolder(folderName);
   } else {
     await window.electronAPI.showAlertDialog(t('noFormGeneratedYet'));
   }
@@ -960,22 +1003,30 @@ async function loadGeneratedForms() {
               <th class="border border-gray-300 px-4 py-2 text-left">${t('employee')}</th>
               <th class="border border-gray-300 px-4 py-2 text-left">${t('department')}</th>
               <th class="border border-gray-300 px-4 py-2 text-left">${t('position')}</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">${t('type')}</th>
               <th class="border border-gray-300 px-4 py-2 text-left">${t('generated')}</th>
               <th class="border border-gray-300 px-4 py-2 text-left">${t('actions')}</th>
             </tr>
           </thead>
           <tbody>
-            ${recentForms.map(form => `
+            ${recentForms.map(form => {
+              const typeText = form.type === 'checklist' ? t('checklist') : t('solicitud');
+              const typeClass = form.type === 'checklist' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
+              return `
               <tr>
                 <td class="border border-gray-300 px-4 py-2">${form.name}</td>
                 <td class="border border-gray-300 px-4 py-2">${form.department}</td>
                 <td class="border border-gray-300 px-4 py-2">${form.position}</td>
+                <td class="border border-gray-300 px-4 py-2">
+                  <span class="px-2 py-1 text-xs rounded-full ${typeClass}">${typeText}</span>
+                </td>
                 <td class="border border-gray-300 px-4 py-2">${new Date(form.generatedAt).toLocaleString('es-CR')}</td>
                 <td class="border border-gray-300 px-4 py-2">
                   <button class="btn btn-sm btn-primary" onclick="window.electronAPI.openGeneratedFile('${form.filename}')">${t('open')}</button>
                 </td>
               </tr>
-            `).join('')}
+            `;
+            }).join('')}
           </tbody>
         </table>
         ${forms.length > 5 ? `
@@ -1038,6 +1089,41 @@ document.getElementById('modal').addEventListener('click', function(e) {
 
 // Make data globally accessible for modal functions
 window.data = data;
+
+// Cleanup functions
+async function cleanupLeftoverFiles() {
+  try {
+    const confirmed = await window.electronAPI.showConfirmDialog(t('confirmCleanupLeftoverFiles'));
+    if (!confirmed) return;
+    
+    const result = await window.electronAPI.cleanupLeftoverFiles();
+    if (result.success) {
+      await window.electronAPI.showAlertDialog(t('cleanupLeftoverFilesSuccess'));
+    } else {
+      await window.electronAPI.showAlertDialog(t('cleanupLeftoverFilesError', { error: result.error }));
+    }
+  } catch (error) {
+    console.error('Error cleaning up leftover files:', error);
+    await window.electronAPI.showAlertDialog(t('cleanupLeftoverFilesError', { error: error.message }));
+  }
+}
+
+async function cleanupOldFiles() {
+  try {
+    const confirmed = await window.electronAPI.showConfirmDialog(t('confirmCleanupOldFiles'));
+    if (!confirmed) return;
+    
+    const result = await window.electronAPI.cleanupOldFiles({ maxAgeHours: 24 });
+    if (result.success) {
+      await window.electronAPI.showAlertDialog(t('cleanupOldFilesSuccess'));
+    } else {
+      await window.electronAPI.showAlertDialog(t('cleanupOldFilesError', { error: result.error }));
+    }
+  } catch (error) {
+    console.error('Error cleaning up old files:', error);
+    await window.electronAPI.showAlertDialog(t('cleanupOldFilesError', { error: error.message }));
+  }
+}
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', async () => {

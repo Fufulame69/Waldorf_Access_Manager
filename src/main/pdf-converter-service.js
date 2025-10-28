@@ -52,6 +52,7 @@ class PDFConverterService {
    * @returns {Promise<string>} Path to the generated PDF
    */
   async convertHTMLToPDF(htmlContent, outputPath, options = {}) {
+    let tempHtmlPath = null;
     try {
       // First try the Puppeteer approach
       try {
@@ -60,7 +61,7 @@ class PDFConverterService {
         console.warn('Puppeteer conversion failed, trying alternative method:', puppeteerError.message);
         
         // Fallback to a simpler approach - save HTML and try to convert with a different method
-        const tempHtmlPath = outputPath.replace('.pdf', '_temp.html');
+        tempHtmlPath = outputPath.replace('.pdf', '_temp.html');
         await fs.writeFile(tempHtmlPath, htmlContent, 'utf8');
         
         // For now, let's try a more basic Puppeteer approach
@@ -69,6 +70,17 @@ class PDFConverterService {
     } catch (error) {
       console.error('Error converting HTML to PDF:', error);
       throw new Error(`Failed to convert HTML to PDF: ${error.message}`);
+    } finally {
+      // Clean up any temporary HTML file that might have been created
+      if (tempHtmlPath) {
+        try {
+          await fs.unlink(tempHtmlPath);
+          console.log(`Temporary HTML file deleted: ${tempHtmlPath}`);
+        } catch (e) {
+          // Ignore cleanup errors
+          console.warn(`Failed to delete temporary HTML file: ${tempHtmlPath}`, e.message);
+        }
+      }
     }
   }
 
@@ -166,7 +178,8 @@ class PDFConverterService {
       page = await browser.newPage();
       
       // Go to the HTML file
-      await page.goto(`file://${htmlFilePath}`, {
+      const absoluteHtmlPath = path.resolve(htmlFilePath);
+      await page.goto(`file://${absoluteHtmlPath}`, {
         waitUntil: 'load',
         timeout: 15000
       });
@@ -187,13 +200,6 @@ class PDFConverterService {
 
       // Generate the PDF
       await page.pdf(pdfOptions);
-      
-      // Clean up the temporary HTML file
-      try {
-        await fs.unlink(htmlFilePath);
-      } catch (e) {
-        // Ignore cleanup errors
-      }
       
       console.log(`PDF generated successfully: ${outputPath}`);
       return outputPath;

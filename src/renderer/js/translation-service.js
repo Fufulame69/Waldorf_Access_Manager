@@ -54,14 +54,23 @@ class TranslationService {
         startDate: 'Start Date',
         generateForm: 'Generate Form',
         generatedForm: 'Generated Form',
+        formsGeneratedSuccessfully: '✅ Forms generated successfully!',
+        solicitudFile: 'Solicitud File',
+        checklistFile: 'Checklist File',
+        openSolicitud: 'Open Solicitud',
+        openChecklist: 'Open Checklist',
+        openEmployeeFolder: 'Open Employee Folder',
         openForm: 'Open Form',
         viewAllForms: 'View All Forms',
         recentlyGeneratedForms: 'Recently Generated Forms',
         noFormsGeneratedYet: 'No forms generated yet.',
         employee: 'Employee',
         generated: 'Generated',
+        type: 'Type',
         actions: 'Actions',
         open: 'Open',
+        solicitud: 'Solicitud',
+        checklist: 'Checklist',
         viewAllFormsCount: 'View All {count} Forms',
         
         // Configuration Tab
@@ -75,6 +84,19 @@ class TranslationService {
         selectLanguage: 'Select Language',
         english: 'English',
         spanish: 'Spanish',
+        
+        // Cleanup Settings
+        cleanupSettings: 'Cleanup Settings',
+        cleanupDescription: 'Clean up leftover HTML files and old generated forms to free up disk space.',
+        cleanupLeftoverFiles: 'Clean Up Leftover Files',
+        cleanupOldFiles: 'Clean Up Old Files (24h+)',
+        cleanupNote: 'Note: Leftover HTML files are automatically deleted after PDF generation, but you can manually clean them up if needed.',
+        confirmCleanupLeftoverFiles: 'Are you sure you want to clean up all leftover HTML files? This will delete HTML files that were created during PDF generation.',
+        confirmCleanupOldFiles: 'Are you sure you want to clean up old files (older than 24 hours)? This will permanently delete old generated forms.',
+        cleanupLeftoverFilesSuccess: '✅ Leftover files cleaned up successfully!',
+        cleanupLeftoverFilesError: '❌ Error cleaning up leftover files: {error}',
+        cleanupOldFilesSuccess: '✅ Old files cleaned up successfully!',
+        cleanupOldFilesError: '❌ Error cleaning up old files: {error}',
         
         // Modal Titles
         addDepartmentTitle: 'Add Department',
@@ -181,14 +203,23 @@ class TranslationService {
         startDate: 'Fecha de Inicio',
         generateForm: 'Generar Formulario',
         generatedForm: 'Formulario Generado',
+        formsGeneratedSuccessfully: '✅ ¡Formularios generados exitosamente!',
+        solicitudFile: 'Archivo de Solicitud',
+        checklistFile: 'Archivo de Checklist',
+        openSolicitud: 'Abrir Solicitud',
+        openChecklist: 'Abrir Checklist',
+        openEmployeeFolder: 'Abrir Carpeta del Empleado',
         openForm: 'Abrir Formulario',
         viewAllForms: 'Ver Todos los Formularios',
         recentlyGeneratedForms: 'Formularios Generados Recientemente',
         noFormsGeneratedYet: 'Aún no se han generado formularios.',
         employee: 'Empleado',
         generated: 'Generado',
+        type: 'Tipo',
         actions: 'Acciones',
         open: 'Abrir',
+        solicitud: 'Solicitud',
+        checklist: 'Checklist',
         viewAllFormsCount: 'Ver Todos los {count} Formularios',
         
         // Configuration Tab
@@ -202,6 +233,19 @@ class TranslationService {
         selectLanguage: 'Seleccionar Idioma',
         english: 'Inglés',
         spanish: 'Español',
+        
+        // Cleanup Settings
+        cleanupSettings: 'Configuración de Limpieza',
+        cleanupDescription: 'Limpiar archivos HTML sobrantes y formularios generados antiguos para liberar espacio en disco.',
+        cleanupLeftoverFiles: 'Limpiar Archivos Sobrantes',
+        cleanupOldFiles: 'Limpiar Archivos Antiguos (24h+)',
+        cleanupNote: 'Nota: Los archivos HTML sobrantes se eliminan automáticamente después de la generación del PDF, pero puedes limpiarlos manualmente si es necesario.',
+        confirmCleanupLeftoverFiles: '¿Está seguro de que desea limpiar todos los archivos HTML sobrantes? Esto eliminará los archivos HTML que se crearon durante la generación del PDF.',
+        confirmCleanupOldFiles: '¿Está seguro de que desea limpiar archivos antiguos (más de 24 horas)? Esto eliminará permanentemente los formularios generados antiguos.',
+        cleanupLeftoverFilesSuccess: '✅ ¡Archivos sobrantes limpiados exitosamente!',
+        cleanupLeftoverFilesError: '❌ Error al limpiar archivos sobrantes: {error}',
+        cleanupOldFilesSuccess: '✅ ¡Archivos antiguos limpiados exitosamente!',
+        cleanupOldFilesError: '❌ Error al limpiar archivos antiguos: {error}',
         
         // Modal Titles
         addDepartmentTitle: 'Agregar Departamento',
@@ -503,6 +547,22 @@ class TranslationService {
     
     const langLabel = document.querySelector('label[for="languageSelect"]');
     if (langLabel) langLabel.textContent = this.t('selectLanguage');
+    
+    // Update cleanup settings section
+    const cleanupSettingsTitle = document.querySelector('#configurationView .config-module:nth-child(3) h3');
+    if (cleanupSettingsTitle) cleanupSettingsTitle.textContent = this.t('cleanupSettings');
+    
+    const cleanupDescription = document.querySelector('#configurationView .config-module:nth-child(3) p');
+    if (cleanupDescription) cleanupDescription.textContent = this.t('cleanupDescription');
+    
+    const cleanupNote = document.querySelector('#configurationView .config-module:nth-child(3) p:last-child');
+    if (cleanupNote) cleanupNote.textContent = this.t('cleanupNote');
+    
+    const cleanupLeftoverBtn = document.querySelector('button[onclick="cleanupLeftoverFiles()"]');
+    if (cleanupLeftoverBtn) cleanupLeftoverBtn.textContent = this.t('cleanupLeftoverFiles');
+    
+    const cleanupOldBtn = document.querySelector('button[onclick="cleanupOldFiles()"]');
+    if (cleanupOldBtn) cleanupOldBtn.textContent = this.t('cleanupOldFiles');
   }
 
   // Update modal content
