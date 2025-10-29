@@ -20,6 +20,7 @@
         <!-- ADDED new tab button -->
         <button class="tab" onclick="switchTab('formGenerator')" data-i18n="formGenerator">Form Generator</button>
         <button class="tab" onclick="switchTab('configuration')" data-i18n="configuration">Configuration</button>
+        <button class="tab" onclick="switchTab('users')" data-i18n="userManagement">User Management</button>
       </div>
     </nav>
 
@@ -70,6 +71,15 @@
         </div>
         <div id="configurationView">
           <!-- Configuration content will be rendered here by app.js -->
+        </div>
+      </div>
+      <!-- ADDED User Management Tab -->
+      <div id="users" class="tab-content">
+        <div class="action-bar">
+          <h2 data-i18n="userManagement">User Management</h2>
+        </div>
+        <div id="userManagementView">
+          <!-- User management content will be rendered here by app.js -->
         </div>
       </div>
     </main>

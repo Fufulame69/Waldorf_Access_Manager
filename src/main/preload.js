@@ -22,3 +22,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   cleanupLeftoverFiles: (options) => ipcRenderer.invoke('cleanup-leftover-files', options),
   cleanupOldFiles: (options) => ipcRenderer.invoke('cleanup-old-files', options)
 });
+
+contextBridge.exposeInMainWorld('auth', {
+    login: (username, password) => ipcRenderer.invoke('login', username, password),
+    getCurrentUser: () => ipcRenderer.invoke('get-current-user'),
+    addUser: (userData) => ipcRenderer.invoke('add-user', userData),
+    updateUser: (userData) => ipcRenderer.invoke('update-user', userData)
+});

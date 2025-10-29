@@ -568,3 +568,22 @@ body {
     opacity: 1;
   }
 }
+
+/* Login Container */
+.login-container {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 40px;
+  background: #FFFFFF;
+  border: 1px solid #000;
+  text-align: center;
+}
+
+.login-container h2 {
+  margin-bottom: 20px;
+}
+
+.error-message {
+  color: #dc3545;
+  margin-top: 15px;
+}

@@ -6,6 +6,7 @@ let data = {
   accessMatrix: {}
 };
 
+let currentUser = null;
 let currentDepartment = null;
 let currentPosition = null;
 
@@ -50,6 +51,19 @@ async function saveData() {k
     console.error('Error saving data to Firebase:', error);
     alert('Error saving data: ' + error.message);
   }
+}
+
+function hasPermission(action) {
+    if (!currentUser) return false;
+
+    const rolePermissions = {
+        admin: ['manageDepartments', 'managePositions', 'manageSystems', 'manageCategories', 'manageUsers', 'generateForms', 'viewConfigurations'],
+        editor: ['manageDepartments', 'managePositions', 'manageSystems', 'generateForms'],
+        approver: ['generateForms'],
+        viewer: []
+    };
+
+    return rolePermissions[currentUser.role]?.includes(action);
 }
 
 function showSaveIndicator() {
@@ -97,6 +111,8 @@ function switchTab(tab) {
     renderFormGenerator();
   } else if (tab === 'configuration') { // ADDED
     renderConfiguration();
+  } else if (tab === 'users') {
+    renderUserManagement();
   } else if (tab === 'departments') { // UPDATED
     // When switching back to departments, reset to the top level
     showDepartments();
@@ -115,7 +131,7 @@ function showDepartments() {
   document.getElementById('accessView').style.display = 'none';
   
   // Show the add department button only when viewing departments
-  document.getElementById('addDepartmentBtn').style.display = 'block';
+  document.getElementById('addDepartmentBtn').style.display = hasPermission('manageDepartments') ? 'block' : 'none';
   
   updateBreadcrumb(['Departments']);
   renderDepartments();
@@ -140,10 +156,12 @@ function renderDepartments() {
     <div class="dept-grid">
       ${data.departments.map(dept => `
         <div class="dept-card" onclick="showPositions(${dept.id})">
+          ${hasPermission('manageDepartments') ? `
           <div class="dept-actions" onclick="event.stopPropagation()">
             <button class="icon-btn" onclick="editDepartment(${dept.id})" title="${t('edit')}">✏️</button>
             <button class="icon-btn" onclick="deleteDepartment(${dept.id})" title="${t('delete')}">🗑️</button>
           </div>
+          ` : ''}
           <h3>${dept.name}</h3>
           <p>${dept.positions ? dept.positions.length : 0} ${t('positions')}</p>
         </div>
@@ -177,7 +195,7 @@ function renderPositions() {
   container.innerHTML = `
     <div class="action-bar">
       <h2>${t('departmentPositions', { departmentName: currentDepartment.name })}</h2>
-      <button class="btn btn-primary" onclick="openModal('addPosition')">${t('addPosition')}</button>
+      ${hasPermission('managePositions') ? `<button class="btn btn-primary" onclick="openModal('addPosition')">${t('addPosition')}</button>` : ''}
     </div>
     ${positions.length === 0 ? `
       <div class="empty-state">
@@ -190,10 +208,12 @@ function renderPositions() {
           <div class="position-item" onclick="showAccess(${pos.id})">
             <div class="position-header">
               <span class="position-name">${pos.name}</span>
+              ${hasPermission('managePositions') ? `
               <div class="dept-actions" onclick="event.stopPropagation()">
                 <button class="icon-btn" onclick="editPosition(${pos.id})" title="${t('edit')}">✏️</button>
                 <button class="icon-btn" onclick="deletePosition(${pos.id})" title="${t('delete')}">🗑️</button>
               </div>
+              ` : ''}
             </div>
           </div>
         `).join('')}
@@ -250,6 +270,7 @@ function renderAccessMatrix() {
                   id="sys-${sys.id}"
                   ${access[sys.id] ? 'checked' : ''}
                   onchange="toggleAccess(${sys.id})"
+                  ${!hasPermission('managePositions') ? 'disabled' : ''}
                 >
                 <label for="sys-${sys.id}">${sys.name}</label>
               </div>
@@ -293,9 +314,11 @@ function renderSystemsView() {
             <div class="category-header">
               <span class="category-name">${cat.name}</span>
               <div>
-                <button class="btn btn-success" onclick="openModal('addSystem', ${cat.id})">${t('add')}</button>
+                ${hasPermission('manageSystems') ? `<button class="btn btn-success" onclick="openModal('addSystem', ${cat.id})">${t('add')}</button>` : ''}
+                ${hasPermission('manageCategories') ? `
                 <button class="icon-btn" onclick="editCategory(${cat.id})" title="${t('edit')}">✏️</button>
                 <button class="icon-btn" onclick="deleteCategory(${cat.id})" title="${t('delete')}">🗑️</button>
+                ` : ''}
               </div>
             </div>
             ${systems.length === 0 ? `<p style="color:#6c757d; font-size: 0.9em;">${t('noSystems')}</p>` : `
@@ -303,10 +326,12 @@ function renderSystemsView() {
                 ${systems.map(sys => `
                   <div class="system-tag">
                     <span>${sys.name}</span>
+                    ${hasPermission('manageSystems') ? `
                     <div>
                       <button class="icon-btn" onclick="editSystem(${sys.id})" title="${t('edit')}">✏️</button>
                       <button class="icon-btn" onclick="deleteSystem(${sys.id})" title="${t('delete')}">🗑️</button>
                     </div>
+                    ` : ''}
                   </div>
                 `).join('')}
               </div>
@@ -430,6 +455,55 @@ function openModal(type, param) {
           </select>
         </div>
         <button class="btn btn-primary" onclick="updateSystem(${sys.id})">${t('updateSystemBtn')}</button>
+      `;
+      break;
+
+    case 'addUser':
+      title.textContent = t('addUser');
+      body.innerHTML = `
+        <div class="form-group">
+          <label>${t('username')}</label>
+          <input type="text" id="username">
+        </div>
+        <div class="form-group">
+          <label>${t('password')}</label>
+          <input type="password" id="password">
+        </div>
+        <div class="form-group">
+          <label>${t('role')}</label>
+          <select id="role">
+            <option value="admin">Admin</option>
+            <option value="editor">Editor</option>
+            <option value="approver">Approver</option>
+            <option value="viewer">Viewer</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="addUser()">${t('addUser')}</button>
+      `;
+      break;
+
+    case 'editUser':
+      const user = param;
+      title.textContent = t('editUser');
+      body.innerHTML = `
+        <div class="form-group">
+          <label>${t('username')}</label>
+          <input type="text" id="username" value="${user.username}" disabled>
+        </div>
+        <div class="form-group">
+          <label>${t('password')}</label>
+          <input type="password" id="password" placeholder="${t('leaveBlank')}">
+        </div>
+        <div class="form-group">
+          <label>${t('role')}</label>
+          <select id="role">
+            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+            <option value="editor" ${user.role === 'editor' ? 'selected' : ''}>Editor</option>
+            <option value="approver" ${user.role === 'approver' ? 'selected' : ''}>Approver</option>
+            <option value="viewer" ${user.role === 'viewer' ? 'selected' : ''}>Viewer</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="updateUser('${user.username}')">${t('updateUser')}</button>
       `;
       break;
   }
@@ -1125,11 +1199,112 @@ async function cleanupOldFiles() {
   }
 }
 
+function renderUserManagement() {
+    const container = document.getElementById('userManagementView');
+    if (!hasPermission('manageUsers')) {
+        container.innerHTML = `<p>${t('unauthorized')}</p>`;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="action-bar">
+            <h2>${t('userManagement')}</h2>
+            <button class="btn btn-primary" onclick="openModal('addUser')">${t('addUser')}</button>
+        </div>
+        <div class="user-list">
+            ${(data.users || []).map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <span class="user-name">${user.username}</span>
+                        <span class="user-role">${user.role}</span>
+                    </div>
+                    <div class="user-actions">
+                        <button class="icon-btn" onclick="editUser('${user.username}')" title="${t('edit')}">✏️</button>
+                        <button class="icon-btn" onclick="deleteUser('${user.username}')" title="${t('delete')}">🗑️</button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// CRUD Operations - Users
+async function addUser() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const role = document.getElementById('role').value;
+
+    if (!username || !password) {
+        alert(t('usernameAndPasswordRequired'));
+        return;
+    }
+
+    const result = await window.auth.addUser({ username, password, role });
+    if (result.success) {
+        await loadData();
+        closeModal();
+        renderUserManagement();
+    } else {
+        alert(result.error);
+    }
+}
+
+async function editUser(username) {
+    const user = data.users.find(u => u.username === username);
+    if (user) {
+        openModal('editUser', user);
+    }
+}
+
+async function updateUser(username) {
+    const password = document.getElementById('password').value.trim();
+    const role = document.getElementById('role').value;
+
+    const result = await window.auth.updateUser({ username, password, role });
+    if (result.success) {
+        await loadData();
+        closeModal();
+        renderUserManagement();
+    } else {
+        alert(result.error);
+    }
+}
+
+async function deleteUser(username) {
+    const confirmed = await window.electronAPI.showConfirmDialog(t('confirmDeleteUser', { username }));
+    if (confirmed) {
+        data.users = data.users.filter(u => u.username !== username);
+        await saveData();
+        renderUserManagement();
+    }
+}
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadData();
-  renderDepartments();
-  
-  // Apply translations after initial render
-  translationService.updateUI();
+    currentUser = await window.auth.getCurrentUser();
+    await loadData();
+
+    if (currentUser) {
+        document.querySelector('.sidebar').style.display = 'flex';
+        document.querySelector('.content').style.display = 'block';
+
+        // Hide tabs based on roles
+        if (!hasPermission('manageSystems') && !hasPermission('manageCategories')) {
+            document.querySelector('.tab[onclick*="systems"]').style.display = 'none';
+        }
+        if (!hasPermission('generateForms')) {
+            document.querySelector('.tab[onclick*="formGenerator"]').style.display = 'none';
+        }
+        if (!hasPermission('viewConfigurations')) {
+            document.querySelector('.tab[onclick*="configuration"]').style.display = 'none';
+        }
+        if (!hasPermission('manageUsers')) {
+            document.querySelector('.tab[onclick*="users"]').style.display = 'none';
+        }
+
+        renderDepartments();
+    }
+
+    // Apply translations after initial render
+    translationService.updateUI();
 });

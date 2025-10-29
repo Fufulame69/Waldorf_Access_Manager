@@ -2,12 +2,14 @@ const electron = require('electron');
 const { app, BrowserWindow, dialog, ipcMain } = electron;
 const path = require('path');
 const { getDatabase, saveDatabase } = require('./firebase-service');
+const authService = require('./auth-service');
 const TemplateService = require('./template-service');
 
 let mainWindow;
+let loginWindow;
 const templateService = new TemplateService();
 
-function createWindow() {
+function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -31,6 +33,63 @@ function createWindow() {
     mainWindow = null;
   });
 }
+
+function createLoginWindow() {
+  loginWindow = new BrowserWindow({
+    width: 400,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    icon: path.join(__dirname, '../assets/waldorf_logo.png'),
+    title: 'Login'
+  });
+
+  loginWindow.loadFile(path.join(__dirname, '../renderer/login.html'));
+
+  loginWindow.on('closed', () => {
+    loginWindow = null;
+  });
+}
+
+ipcMain.handle('login', async (event, username, password) => {
+    const result = await authService.login(username, password);
+    if (result.success) {
+        createMainWindow();
+        loginWindow.close();
+    }
+    return result;
+});
+
+ipcMain.handle('get-current-user', () => {
+    return authService.getCurrentUser();
+});
+
+ipcMain.handle('add-user', async (event, userData) => {
+    const user = authService.getCurrentUser();
+    if (user && user.role === 'admin') {
+        return await authService.addUser(userData);
+    }
+    return { success: false, error: 'Unauthorized' };
+});
+
+ipcMain.handle('update-user', async (event, userData) => {
+    const user = authService.getCurrentUser();
+    if (user && user.role === 'admin') {
+        return await authService.updateUser(userData);
+    }
+    return { success: false, error: 'Unauthorized' };
+});
+
+ipcMain.handle('save-data', async (event, data) => {
+    const user = authService.getCurrentUser();
+    if (user && (user.role === 'admin' || user.role === 'editor')) {
+        return await saveDatabase(data);
+    }
+    return { success: false, error: 'Unauthorized' };
+});
 
 // Handle confirmation dialog requests
 ipcMain.handle('show-confirm-dialog', async (event, message) => {
@@ -224,7 +283,7 @@ ipcMain.handle('cleanup-old-files', async (event, options = {}) => {
   }
 });
 
-app.on('ready', createWindow);
+app.on('ready', createLoginWindow);
 
 app.on('window-all-closed', async () => {
   // Close the PDF converter service before quitting
