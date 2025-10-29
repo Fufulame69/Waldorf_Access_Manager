@@ -15,6 +15,7 @@ function createMainWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -38,6 +39,7 @@ function createLoginWindow() {
   loginWindow = new BrowserWindow({
     width: 400,
     height: 600,
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -131,60 +133,11 @@ ipcMain.handle('generate-form', async (event, userData, options = {}) => {
     // Generate the form
     const formResults = await templateService.generateForm(data, userData, './generated-forms', generateOptions);
     
-    // Read existing forms or create new array
-    const formsDir = path.join(process.cwd(), 'generated-forms');
-    const formsPath = path.join(formsDir, 'forms.json');
-    
-    let forms = [];
-    try {
-      const formsData = await require('fs').promises.readFile(formsPath, 'utf8');
-      forms = JSON.parse(formsData);
-    } catch (error) {
-      // File doesn't exist, start with empty array
-    }
-    
-    // Add both solicitud and checklist forms to the list
-    const solicitudFilename = path.basename(formResults.solicitud);
-    const checklistFilename = path.basename(formResults.checklist);
-    
-    const solicitudForm = {
-      name: userData.name,
-      department: userData.department,
-      position: userData.position,
-      filename: solicitudFilename,
-      type: 'solicitud',
-      generatedAt: new Date().toISOString()
-    };
-    
-    const checklistForm = {
-      name: userData.name,
-      department: userData.department,
-      position: userData.position,
-      filename: checklistFilename,
-      type: 'checklist',
-      generatedAt: new Date().toISOString()
-    };
-    
-    forms.push(solicitudForm, checklistForm);
-    
-    // Keep only last 50 forms to prevent the file from getting too large
-    if (forms.length > 50) {
-      forms = forms.slice(-50);
-    }
-    
-    // Save the forms list
-    await require('fs').promises.mkdir(formsDir, { recursive: true });
-    await require('fs').promises.writeFile(formsPath, JSON.stringify(forms, null, 2));
-    
-    // Generate the index file
-    const indexPath = await templateService.generateIndex(forms);
-    
     return {
       success: true,
       formResults: formResults,
-      indexPath: indexPath,
-      solicitudFilename: solicitudFilename,
-      checklistFilename: checklistFilename
+      solicitudFilename: path.basename(formResults.solicitud),
+      checklistFilename: path.basename(formResults.checklist)
     };
   } catch (error) {
     console.error('Error generating form:', error);
@@ -195,22 +148,6 @@ ipcMain.handle('generate-form', async (event, userData, options = {}) => {
   }
 });
 
-// IPC handler for getting list of generated forms
-ipcMain.handle('get-generated-forms', async () => {
-  try {
-    const formsPath = path.join(process.cwd(), 'generated-forms', 'forms.json');
-    
-    try {
-      const formsData = await require('fs').promises.readFile(formsPath, 'utf8');
-      return JSON.parse(formsData);
-    } catch (error) {
-      return [];
-    }
-  } catch (error) {
-    console.error('Error getting generated forms:', error);
-    return [];
-  }
-});
 
 // IPC handler for opening generated files
 ipcMain.handle('open-generated-file', async (event, filename) => {

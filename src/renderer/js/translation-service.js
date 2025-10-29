@@ -12,6 +12,7 @@ class TranslationService {
         departmentsAndPositions: 'Departments and positions',
         systemsManagement: 'Systems Management',
         formGenerator: 'Form Generator',
+        staffManagement: 'Staff Management',
         configuration: 'Configuration',
         
         // Departments Tab
@@ -61,8 +62,6 @@ class TranslationService {
         openChecklist: 'Open Checklist',
         openEmployeeFolder: 'Open Employee Folder',
         openForm: 'Open Form',
-        viewAllForms: 'View All Forms',
-        recentlyGeneratedForms: 'Recently Generated Forms',
         noFormsGeneratedYet: 'No forms generated yet.',
         employee: 'Employee',
         generated: 'Generated',
@@ -71,7 +70,6 @@ class TranslationService {
         open: 'Open',
         solicitud: 'Solicitud',
         checklist: 'Checklist',
-        viewAllFormsCount: 'View All {count} Forms',
         
         // Configuration Tab
         formGenerationSettings: 'Form Generation Settings',
@@ -163,6 +161,22 @@ class TranslationService {
         confirmDeleteUser: 'Are you sure you want to delete the user "{username}"?',
         unauthorized: 'You are not authorized to view this page.',
         
+        // Staff Management
+        addStaff: 'Add Staff',
+        editStaff: 'Edit Staff',
+        updateStaff: 'Update Staff',
+        allDepartments: 'All Departments',
+        allPositions: 'All Positions',
+        search: 'Search',
+        searchByName: 'Search by name',
+        noStaffMembers: 'No Staff Members Yet',
+        clickAddStaffToStart: 'Click "Add Staff" to get started',
+        noMatchingStaff: 'No matching staff members found',
+        tryDifferentFilters: 'Try different filters',
+        confirmDeleteStaff: 'Are you sure you want to delete staff member "{staffName}"?',
+        staffDataSaved: '✅ Staff data saved to database!',
+        name: 'Name',
+        
         // Tooltips
         edit: 'Edit',
         delete: 'Delete'
@@ -176,6 +190,7 @@ class TranslationService {
         departmentsAndPositions: 'Departamentos y posiciones',
         systemsManagement: 'Gestión de Sistemas',
         formGenerator: 'Generador de Formularios',
+        staffManagement: 'Gestión de Personal',
         configuration: 'Configuración',
         
         // Departments Tab
@@ -225,8 +240,6 @@ class TranslationService {
         openChecklist: 'Abrir Checklist',
         openEmployeeFolder: 'Abrir Carpeta del Empleado',
         openForm: 'Abrir Formulario',
-        viewAllForms: 'Ver Todos los Formularios',
-        recentlyGeneratedForms: 'Formularios Generados Recientemente',
         noFormsGeneratedYet: 'Aún no se han generado formularios.',
         employee: 'Empleado',
         generated: 'Generado',
@@ -235,7 +248,6 @@ class TranslationService {
         open: 'Abrir',
         solicitud: 'Solicitud',
         checklist: 'Checklist',
-        viewAllFormsCount: 'Ver Todos los {count} Formularios',
         
         // Configuration Tab
         formGenerationSettings: 'Configuración de Generación de Formularios',
@@ -327,6 +339,22 @@ class TranslationService {
         confirmDeleteUser: '¿Está seguro de que desea eliminar al usuario "{username}"?',
         unauthorized: 'No está autorizado para ver esta página.',
         
+        // Staff Management
+        addStaff: 'Agregar Personal',
+        editStaff: 'Editar Personal',
+        updateStaff: 'Actualizar Personal',
+        allDepartments: 'Todos los Departamentos',
+        allPositions: 'Todas las Posiciones',
+        search: 'Buscar',
+        searchByName: 'Buscar por nombre',
+        noStaffMembers: 'Aún No Hay Miembros del Personal',
+        clickAddStaffToStart: 'Haz clic en "Agregar Personal" para comenzar',
+        noMatchingStaff: 'No se encontraron miembros del personal coincidentes',
+        tryDifferentFilters: 'Pruebe con diferentes filtros',
+        confirmDeleteStaff: '¿Está seguro de que desea eliminar al miembro del personal "{staffName}"?',
+        staffDataSaved: '✅ ¡Datos del personal guardados en la base de datos!',
+        name: 'Nombre',
+        
         // Tooltips
         edit: 'Editar',
         delete: 'Eliminar'
@@ -394,6 +422,8 @@ class TranslationService {
         this.updateFormGeneratorTab();
       } else if (activeTab.id === 'configuration') {
         this.updateConfigurationTab();
+      } else if (activeTab.id === 'staffManagement') {
+        this.updateStaffManagementTab();
       } else if (activeTab.id === 'users') {
         this.updateUserManagementTab();
       }
@@ -528,8 +558,6 @@ class TranslationService {
     
     // Update generated form section
     this.updateElement('#formOutput h3', 'generatedForm');
-    this.updateElement('button[onclick="openGeneratedForm()"]', 'openForm');
-    this.updateElement('button[onclick="openFormsIndex()"]', 'viewAllForms');
     
     // Update recently generated forms section
     this.updateElement('#generatedFormsList h3', 'recentlyGeneratedForms');
@@ -562,6 +590,79 @@ class TranslationService {
         } else {
           btn.textContent = this.t('viewAllForms');
         }
+      }
+    });
+  }
+
+  // Update staff management tab
+  updateStaffManagementTab() {
+    // Update add staff button
+    const addStaffBtn = document.querySelector('#staffManagement .action-bar button');
+    if (addStaffBtn && (addStaffBtn.textContent.includes('Add Staff') || addStaffBtn.textContent.includes('Agregar Personal'))) {
+      addStaffBtn.textContent = this.t('addStaff');
+    }
+    
+    // Update filter labels
+    const filterLabels = document.querySelectorAll('.filter-group label');
+    filterLabels.forEach(label => {
+      if (label.textContent.includes('Department') || label.textContent.includes('Departamento')) {
+        label.textContent = this.t('department');
+      } else if (label.textContent.includes('Position') || label.textContent.includes('Posición')) {
+        label.textContent = this.t('position');
+      } else if (label.textContent.includes('Search') || label.textContent.includes('Buscar')) {
+        label.textContent = this.t('search');
+      }
+    });
+    
+    // Update filter placeholders
+    const searchInput = document.querySelector('#searchStaff');
+    if (searchInput) {
+      searchInput.setAttribute('placeholder', this.t('searchByName'));
+    }
+    
+    // Update filter options
+    const deptFilter = document.querySelector('#departmentFilter option:first-child');
+    if (deptFilter && (deptFilter.textContent.includes('All Departments') || deptFilter.textContent.includes('Todos los Departamentos'))) {
+      deptFilter.textContent = this.t('allDepartments');
+    }
+    
+    const posFilter = document.querySelector('#positionFilter option:first-child');
+    if (posFilter && (posFilter.textContent.includes('All Positions') || posFilter.textContent.includes('Todas las Posiciones'))) {
+      posFilter.textContent = this.t('allPositions');
+    }
+    
+    // Update empty state if present
+    const emptyState = document.querySelector('#staffManagementView .empty-state h3');
+    if (emptyState && (emptyState.textContent.includes('No Staff Members') || emptyState.textContent.includes('Aún No Hay Miembros del Personal'))) {
+      emptyState.textContent = this.t('noStaffMembers');
+      const emptyStateP = document.querySelector('#staffManagementView .empty-state p');
+      if (emptyStateP) emptyStateP.textContent = this.t('clickAddStaffToStart');
+    }
+    
+    // Update table headers
+    const tableHeaders = document.querySelectorAll('.staff-table th');
+    if (tableHeaders.length >= 6) {
+      tableHeaders[0].textContent = this.t('name');
+      tableHeaders[1].textContent = this.t('idmLoginName');
+      tableHeaders[2].textContent = this.t('emailAccount');
+      tableHeaders[3].textContent = this.t('department');
+      tableHeaders[4].textContent = this.t('position');
+      tableHeaders[5].textContent = this.t('startDate');
+      tableHeaders[6].textContent = this.t('actions');
+    }
+    
+    // Update edit/delete buttons in table
+    const editBtns = document.querySelectorAll('.staff-table button[onclick*="editStaff"]');
+    editBtns.forEach(btn => {
+      if (btn.textContent === 'Edit' || btn.textContent === 'Editar') {
+        btn.textContent = this.t('edit');
+      }
+    });
+    
+    const deleteBtns = document.querySelectorAll('.staff-table button[onclick*="deleteStaff"]');
+    deleteBtns.forEach(btn => {
+      if (btn.textContent === 'Delete' || btn.textContent === 'Eliminar') {
+        btn.textContent = this.t('delete');
       }
     });
   }

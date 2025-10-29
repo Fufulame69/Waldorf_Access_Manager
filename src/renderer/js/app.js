@@ -3,7 +3,8 @@ let data = {
   departments: [],
   systems: [],
   categories: [],
-  accessMatrix: {}
+  accessMatrix: {},
+  staffMembers: []
 };
 
 let currentUser = null;
@@ -29,6 +30,12 @@ const sidebarModules = [
     translationKey: 'formGenerator',
     icon: '',
     permission: 'generateForms'
+  },
+  {
+    id: 'staffManagement',
+    translationKey: 'staffManagement',
+    icon: '',
+    permission: 'manageStaff'
   },
   {
     id: 'users',
@@ -61,13 +68,14 @@ async function loadData() {
       departments: [],
       systems: [],
       categories: [],
-      accessMatrix: {}
+      accessMatrix: {},
+      staffMembers: []
     };
   }
 }
 
 // Save data to Firebase
-async function saveData() {k
+async function saveData() {
   try {
     // Update the last modified timestamp
     data.metadata.lastModified = new Date().toISOString();
@@ -91,9 +99,9 @@ function hasPermission(action) {
     if (!currentUser) return false;
 
     const rolePermissions = {
-        admin: ['manageDepartments', 'managePositions', 'manageSystems', 'manageCategories', 'manageUsers', 'generateForms', 'viewConfigurations'],
-        editor: ['manageDepartments', 'managePositions', 'manageSystems', 'generateForms'],
-        approver: ['generateForms'],
+        admin: ['manageDepartments', 'managePositions', 'manageSystems', 'manageCategories', 'manageUsers', 'generateForms', 'viewConfigurations', 'manageStaff'],
+        editor: ['manageDepartments', 'managePositions', 'manageSystems', 'generateForms', 'manageStaff'],
+        approver: ['generateForms', 'manageStaff'],
         viewer: []
     };
 
@@ -145,6 +153,8 @@ function switchTab(tab) {
     renderFormGenerator();
   } else if (tab === 'configuration') { // ADDED
     renderConfiguration();
+  } else if (tab === 'staffManagement') {
+    renderStaffManagement();
   } else if (tab === 'users') {
     renderUserManagement();
   } else if (tab === 'departments') { // UPDATED
@@ -540,6 +550,91 @@ function openModal(type, param) {
         <button class="btn btn-primary" onclick="updateUser('${user.username}')">${t('updateUser')}</button>
       `;
       break;
+
+    case 'addStaff':
+      title.textContent = t('addStaff');
+      body.innerHTML = `
+        <div class="form-group">
+          <label>${t('employeeName')}</label>
+          <input type="text" id="staffName" placeholder="${t('enterFullName')}">
+        </div>
+        <div class="form-group">
+          <label>${t('idmLoginName')}</label>
+          <input type="text" id="staffIdmLogin" placeholder="${t('enterIdmLoginName')}">
+        </div>
+        <div class="form-group">
+          <label>${t('emailAccount')}</label>
+          <input type="email" id="staffEmail" placeholder="${t('enterEmailAddress')}">
+        </div>
+        <div class="form-group">
+          <label>${t('department')}</label>
+          <select id="staffDepartment">
+            <option value="">${t('selectDepartment')}</option>
+            ${data.departments.map(dept => `<option value="${dept.name}">${dept.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>${t('position')}</label>
+          <select id="staffPosition">
+            <option value="">${t('selectPosition')}</option>
+            <!-- Positions will be populated based on department selection -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>${t('startDate')}</label>
+          <input type="date" id="staffStartDate">
+        </div>
+        <button class="btn btn-primary" onclick="addStaff()">${t('addStaff')}</button>
+      `;
+      // Add event listener to update positions when department changes
+      setTimeout(() => {
+        document.getElementById('staffDepartment').addEventListener('change', updateStaffPositionDropdown);
+        updateStaffPositionDropdown();
+      }, 100);
+      break;
+
+    case 'editStaff':
+      const staff = param;
+      title.textContent = t('editStaff');
+      body.innerHTML = `
+        <div class="form-group">
+          <label>${t('employeeName')}</label>
+          <input type="text" id="staffName" value="${staff.name}">
+        </div>
+        <div class="form-group">
+          <label>${t('idmLoginName')}</label>
+          <input type="text" id="staffIdmLogin" value="${staff.idmLogin || ''}">
+        </div>
+        <div class="form-group">
+          <label>${t('emailAccount')}</label>
+          <input type="email" id="staffEmail" value="${staff.email || ''}">
+        </div>
+        <div class="form-group">
+          <label>${t('department')}</label>
+          <select id="staffDepartment">
+            <option value="">${t('selectDepartment')}</option>
+            ${data.departments.map(dept => `<option value="${dept.name}" ${dept.name === staff.department ? 'selected' : ''}>${dept.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>${t('position')}</label>
+          <select id="staffPosition">
+            <option value="">${t('selectPosition')}</option>
+            <!-- Positions will be populated based on department selection -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>${t('startDate')}</label>
+          <input type="date" id="staffStartDate" value="${staff.startDate || ''}">
+        </div>
+        <button class="btn btn-primary" onclick="updateStaff('${staff.id}')">${t('updateStaff')}</button>
+      `;
+      // Add event listener to update positions when department changes
+      setTimeout(() => {
+        document.getElementById('staffDepartment').addEventListener('change', updateStaffPositionDropdown);
+        updateStaffPositionDropdown(staff.position);
+      }, 100);
+      break;
   }
 
   modal.classList.add('active');
@@ -876,24 +971,18 @@ function renderFormGenerator() {
       <div id="formOutput" style="display: none;">
         <h3>${t('generatedForm')}</h3>
         <div class="form-actions">
-          <button class="btn btn-success" onclick="openGeneratedForm()">${t('openForm')}</button>
-          <button class="btn btn-info" onclick="openFormsIndex()">${t('viewAllForms')}</button>
+          <button class="btn btn-success" onclick="openGeneratedSolicitud()">${t('openSolicitud')}</button>
+          <button class="btn btn-info" onclick="openGeneratedChecklist()">${t('openChecklist')}</button>
         </div>
         <div id="formStatus"></div>
       </div>
       
-      <div id="generatedFormsList" style="margin-top: 2rem;">
-        <h3>${t('recentlyGeneratedForms')}</h3>
-        <div id="formsListContent"></div>
-      </div>
     </div>
   `;
   
   // Initial call to populate positions
   updatePositionDropdown();
   
-  // Load recently generated forms
-  loadGeneratedForms();
   // Update translations after rendering
   translationService.updateUI();
 }
@@ -1021,6 +1110,36 @@ async function generateForm() {
     statusDiv.innerHTML = `<p class="text-blue-600">${t('generatingForm')}</p>`;
     document.getElementById('formOutput').style.display = 'block';
 
+    // Save staff member to database first
+    if (!data.staffMembers) {
+      data.staffMembers = [];
+    }
+
+    // Check if staff member already exists
+    const existingStaffIndex = data.staffMembers.findIndex(staff =>
+      staff.name === userData.name &&
+      staff.department === userData.department &&
+      staff.position === userData.position
+    );
+
+    const staffData = {
+      id: existingStaffIndex !== -1 ? data.staffMembers[existingStaffIndex].id : Date.now().toString(),
+      ...userData,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (existingStaffIndex !== -1) {
+      // Update existing staff member
+      data.staffMembers[existingStaffIndex] = staffData;
+    } else {
+      // Add new staff member
+      staffData.createdAt = new Date().toISOString();
+      data.staffMembers.push(staffData);
+    }
+
+    // Save staff data to database
+    await saveData();
+
     // Generate form via main process with options
     const result = await window.electronAPI.generateForm(userData, options);
 
@@ -1029,6 +1148,7 @@ async function generateForm() {
         <p class="text-green-600">${t('formsGeneratedSuccessfully')}</p>
         <p class="text-sm text-gray-600">${t('solicitudFile')}: ${result.solicitudFilename}</p>
         <p class="text-sm text-gray-600">${t('checklistFile')}: ${result.checklistFilename}</p>
+        <p class="text-sm text-blue-600">${t('staffDataSaved')}</p>
       `;
       
       // Store the generated file paths for later use
@@ -1042,11 +1162,8 @@ async function generateForm() {
         <button class="btn btn-success" onclick="openGeneratedSolicitud()">${t('openSolicitud')}</button>
         <button class="btn btn-info" onclick="openGeneratedChecklist()">${t('openChecklist')}</button>
         <button class="btn btn-warning" onclick="openEmployeeFolder()">${t('openEmployeeFolder')}</button>
-        <button class="btn btn-secondary" onclick="openFormsIndex()">${t('viewAllForms')}</button>
       `;
       
-      // Reload the forms list
-      loadGeneratedForms();
       // Update translations after rendering
       translationService.updateUI();
     } else {
@@ -1086,70 +1203,6 @@ async function openEmployeeFolder() {
   }
 }
 
-async function openFormsIndex() {
-  await window.electronAPI.openGeneratedFile('index.html');
-}
-
-async function loadGeneratedForms() {
-  try {
-    const forms = await window.electronAPI.getGeneratedForms();
-    const formsListContent = document.getElementById('formsListContent');
-    
-    if (forms.length === 0) {
-      formsListContent.innerHTML = `<p class="text-gray-500">${t('noFormsGeneratedYet')}</p>`;
-      return;
-    }
-
-    // Show last 5 forms
-    const recentForms = forms.slice(-5).reverse();
-    
-    formsListContent.innerHTML = `
-      <div class="forms-table">
-        <table class="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr class="bg-gray-50">
-              <th class="border border-gray-300 px-4 py-2 text-left">${t('employee')}</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">${t('department')}</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">${t('position')}</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">${t('type')}</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">${t('generated')}</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">${t('actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${recentForms.map(form => {
-              const typeText = form.type === 'checklist' ? t('checklist') : t('solicitud');
-              const typeClass = form.type === 'checklist' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
-              return `
-              <tr>
-                <td class="border border-gray-300 px-4 py-2">${form.name}</td>
-                <td class="border border-gray-300 px-4 py-2">${form.department}</td>
-                <td class="border border-gray-300 px-4 py-2">${form.position}</td>
-                <td class="border border-gray-300 px-4 py-2">
-                  <span class="px-2 py-1 text-xs rounded-full ${typeClass}">${typeText}</span>
-                </td>
-                <td class="border border-gray-300 px-4 py-2">${new Date(form.generatedAt).toLocaleString('es-CR')}</td>
-                <td class="border border-gray-300 px-4 py-2">
-                  <button class="btn btn-sm btn-primary" onclick="window.electronAPI.openGeneratedFile('${form.filename}')">${t('open')}</button>
-                </td>
-              </tr>
-            `;
-            }).join('')}
-          </tbody>
-        </table>
-        ${forms.length > 5 ? `
-          <div class="mt-4">
-            <button class="btn btn-info" onclick="openFormsIndex()">${t('viewAllFormsCount', { count: forms.length })}</button>
-          </div>
-        ` : ''}
-      </div>
-    `;
-  } catch (error) {
-    console.error('Error loading generated forms:', error);
-    document.getElementById('formsListContent').innerHTML =
-      `<p class="text-red-600">${t('errorLoadingFormsList')}</p>`;
-  }
-}
 
 // Breadcrumb
 function updateBreadcrumb(items) {
@@ -1231,6 +1284,138 @@ async function cleanupOldFiles() {
     console.error('Error cleaning up old files:', error);
     await window.electronAPI.showAlertDialog(t('cleanupOldFilesError', { error: error.message }));
   }
+}
+
+function renderStaffManagement() {
+    const container = document.getElementById('staffManagementView');
+    if (!hasPermission('manageStaff')) {
+        container.innerHTML = `<p>${t('unauthorized')}</p>`;
+        return;
+    }
+
+    // Get unique departments and positions for filters
+    const departments = [...new Set((data.staffMembers || []).map(staff => staff.department).filter(Boolean))];
+    const positions = [...new Set((data.staffMembers || []).map(staff => staff.position).filter(Boolean))];
+
+    container.innerHTML = `
+        <div class="staff-filters">
+            <div class="filter-group">
+                <label for="departmentFilter">${t('department')}:</label>
+                <select id="departmentFilter" onchange="filterStaff()">
+                    <option value="">${t('allDepartments')}</option>
+                    ${departments.map(dept => `<option value="${dept}">${dept}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="positionFilter">${t('position')}:</label>
+                <select id="positionFilter" onchange="filterStaff()">
+                    <option value="">${t('allPositions')}</option>
+                    ${positions.map(pos => `<option value="${pos}">${pos}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="searchStaff">${t('search')}:</label>
+                <input type="text" id="searchStaff" placeholder="${t('searchByName')}" onkeyup="filterStaff()">
+            </div>
+            <button class="btn btn-primary" onclick="openModal('addStaff')">${t('addStaff')}</button>
+        </div>
+        <div class="staff-table-container">
+            <table class="staff-table">
+                <thead>
+                    <tr>
+                        <th>${t('name')}</th>
+                        <th>${t('idmLoginName')}</th>
+                        <th>${t('emailAccount')}</th>
+                        <th>${t('department')}</th>
+                        <th>${t('position')}</th>
+                        <th>${t('startDate')}</th>
+                        <th>${t('actions')}</th>
+                    </tr>
+                </thead>
+                <tbody id="staffTableBody">
+                    <!-- Staff rows will be populated here -->
+                </tbody>
+            </table>
+            <div id="noStaffMessage" class="empty-state" style="display: none;">
+                <h3>${t('noStaffMembers')}</h3>
+                <p>${t('clickAddStaffToStart')}</p>
+            </div>
+        </div>
+    `;
+    
+    // Populate staff table
+    populateStaffTable();
+    
+    // Update translations after rendering
+    translationService.updateUI();
+}
+
+function populateStaffTable() {
+    const tbody = document.getElementById('staffTableBody');
+    const noStaffMessage = document.getElementById('noStaffMessage');
+    const staffMembers = data.staffMembers || [];
+    
+    if (staffMembers.length === 0) {
+        tbody.innerHTML = '';
+        noStaffMessage.style.display = 'block';
+        return;
+    }
+    
+    noStaffMessage.style.display = 'none';
+    tbody.innerHTML = staffMembers.map(staff => `
+        <tr>
+            <td>${staff.name}</td>
+            <td>${staff.idmLogin || '-'}</td>
+            <td>${staff.email || '-'}</td>
+            <td>${staff.department}</td>
+            <td>${staff.position}</td>
+            <td>${staff.startDate || '-'}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editStaff('${staff.id}')">${t('edit')}</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteStaff('${staff.id}')">${t('delete')}</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function filterStaff() {
+    const departmentFilter = document.getElementById('departmentFilter').value.toLowerCase();
+    const positionFilter = document.getElementById('positionFilter').value.toLowerCase();
+    const searchFilter = document.getElementById('searchStaff').value.toLowerCase();
+    
+    const filteredStaff = (data.staffMembers || []).filter(staff => {
+        const matchesDepartment = !departmentFilter || staff.department.toLowerCase().includes(departmentFilter);
+        const matchesPosition = !positionFilter || staff.position.toLowerCase().includes(positionFilter);
+        const matchesSearch = !searchFilter || staff.name.toLowerCase().includes(searchFilter);
+        
+        return matchesDepartment && matchesPosition && matchesSearch;
+    });
+    
+    const tbody = document.getElementById('staffTableBody');
+    const noStaffMessage = document.getElementById('noStaffMessage');
+    
+    if (filteredStaff.length === 0) {
+        tbody.innerHTML = '';
+        noStaffMessage.style.display = 'block';
+        noStaffMessage.querySelector('h3').textContent = t('noMatchingStaff');
+        noStaffMessage.querySelector('p').textContent = t('tryDifferentFilters');
+    } else {
+        noStaffMessage.style.display = 'none';
+        tbody.innerHTML = filteredStaff.map(staff => `
+            <tr>
+                <td>${staff.name}</td>
+                <td>${staff.idmLogin || '-'}</td>
+                <td>${staff.email || '-'}</td>
+                <td>${staff.department}</td>
+                <td>${staff.position}</td>
+                <td>${staff.startDate || '-'}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="editStaff('${staff.id}')">${t('edit')}</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteStaff('${staff.id}')">${t('delete')}</button>
+                </td>
+            </tr>
+        `).join('');
+    }
 }
 
 function renderUserManagement() {
@@ -1321,6 +1506,112 @@ async function deleteUser(username) {
         await saveData();
         renderUserManagement();
         translationService.updateUI();
+    }
+}
+
+// CRUD Operations - Staff Members
+function updateStaffPositionDropdown(selectedPosition = '') {
+    const deptName = document.getElementById('staffDepartment').value;
+    const posSelect = document.getElementById('staffPosition');
+    
+    posSelect.innerHTML = `<option value="">${t('selectPosition')}</option>`; // Clear existing options
+    
+    if (deptName) {
+        const dept = data.departments.find(d => d.name === deptName);
+        if (dept && dept.positions) {
+            const positionOptions = dept.positions.map(pos =>
+                `<option value="${pos.name}" ${pos.name === selectedPosition ? 'selected' : ''}>${pos.name}</option>`
+            ).join('');
+            posSelect.innerHTML += positionOptions;
+        }
+    }
+}
+
+async function addStaff() {
+    const name = document.getElementById('staffName').value.trim();
+    const idmLogin = document.getElementById('staffIdmLogin').value.trim();
+    const email = document.getElementById('staffEmail').value.trim();
+    const department = document.getElementById('staffDepartment').value;
+    const position = document.getElementById('staffPosition').value;
+    const startDate = document.getElementById('staffStartDate').value;
+
+    if (!name || !department || !position) {
+        alert(t('pleaseFillRequiredFields'));
+        return;
+    }
+
+    const newStaff = {
+        id: Date.now().toString(),
+        name,
+        idmLogin,
+        email,
+        department,
+        position,
+        startDate,
+        createdAt: new Date().toISOString()
+    };
+
+    if (!data.staffMembers) {
+        data.staffMembers = [];
+    }
+
+    data.staffMembers.push(newStaff);
+    await saveData();
+    closeModal();
+    renderStaffManagement();
+}
+
+async function editStaff(id) {
+    const staff = data.staffMembers.find(s => s.id === id);
+    if (staff) {
+        openModal('editStaff', staff);
+    }
+}
+
+async function updateStaff(id) {
+    const name = document.getElementById('staffName').value.trim();
+    const idmLogin = document.getElementById('staffIdmLogin').value.trim();
+    const email = document.getElementById('staffEmail').value.trim();
+    const department = document.getElementById('staffDepartment').value;
+    const position = document.getElementById('staffPosition').value;
+    const startDate = document.getElementById('staffStartDate').value;
+
+    if (!name || !department || !position) {
+        alert(t('pleaseFillRequiredFields'));
+        return;
+    }
+
+    const staffIndex = data.staffMembers.findIndex(s => s.id === id);
+    if (staffIndex !== -1) {
+        data.staffMembers[staffIndex] = {
+            ...data.staffMembers[staffIndex],
+            name,
+            idmLogin,
+            email,
+            department,
+            position,
+            startDate,
+            updatedAt: new Date().toISOString()
+        };
+        
+        await saveData();
+        closeModal();
+        renderStaffManagement();
+    }
+}
+
+async function deleteStaff(id) {
+    const staff = data.staffMembers.find(s => s.id === id);
+    if (!staff) return;
+    
+    const confirmed = await window.electronAPI.showConfirmDialog(
+        t('confirmDeleteStaff', { staffName: staff.name })
+    );
+    
+    if (confirmed) {
+        data.staffMembers = data.staffMembers.filter(s => s.id !== id);
+        await saveData();
+        renderStaffManagement();
     }
 }
 
