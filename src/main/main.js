@@ -119,10 +119,6 @@ ipcMain.handle('load-data', async () => {
   return await getDatabase();
 });
 
-ipcMain.handle('save-data', async (event, data) => {
-  return await saveDatabase(data);
-});
-
 // IPC handler for generating forms
 ipcMain.handle('generate-form', async (event, userData, options = {}) => {
   try {

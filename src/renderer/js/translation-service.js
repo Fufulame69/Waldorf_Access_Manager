@@ -148,6 +148,21 @@ class TranslationService {
         cannotDeleteCategoryWithSystems: 'Cannot delete category with systems. Please delete or reassign all systems first.',
         pleaseFillRequiredFields: 'Please fill in all required fields: Name, Department, and Position.',
         
+        // User Management
+        userManagement: 'User Management',
+        addUser: 'Add User',
+        userName: 'User Name',
+        userRole: 'User Role',
+        username: 'Username',
+        password: 'Password',
+        role: 'Role',
+        editUser: 'Edit User',
+        updateUser: 'Update User',
+        leaveBlank: 'Leave blank to keep current password',
+        usernameAndPasswordRequired: 'Username and password are required',
+        confirmDeleteUser: 'Are you sure you want to delete the user "{username}"?',
+        unauthorized: 'You are not authorized to view this page.',
+        
         // Tooltips
         edit: 'Edit',
         delete: 'Delete'
@@ -297,6 +312,21 @@ class TranslationService {
         cannotDeleteCategoryWithSystems: 'No se puede eliminar una categoría con sistemas. Por favor, elimine o reasigne todos los sistemas primero.',
         pleaseFillRequiredFields: 'Por favor, complete todos los campos requeridos: Nombre, Departamento y Posición.',
         
+        // User Management
+        userManagement: 'Gestión de Usuarios',
+        addUser: 'Agregar Usuario',
+        userName: 'Nombre de Usuario',
+        userRole: 'Rol de Usuario',
+        username: 'Nombre de Usuario',
+        password: 'Contraseña',
+        role: 'Rol',
+        editUser: 'Editar Usuario',
+        updateUser: 'Actualizar Usuario',
+        leaveBlank: 'Dejar en blanco para mantener la contraseña actual',
+        usernameAndPasswordRequired: 'Se requieren nombre de usuario y contraseña',
+        confirmDeleteUser: '¿Está seguro de que desea eliminar al usuario "{username}"?',
+        unauthorized: 'No está autorizado para ver esta página.',
+        
         // Tooltips
         edit: 'Editar',
         delete: 'Eliminar'
@@ -364,8 +394,13 @@ class TranslationService {
         this.updateFormGeneratorTab();
       } else if (activeTab.id === 'configuration') {
         this.updateConfigurationTab();
+      } else if (activeTab.id === 'users') {
+        this.updateUserManagementTab();
       }
     }
+    
+    // Update sidebar navigation
+    this.updateSidebarNavigation();
     
     // Update modal if open
     const modal = document.getElementById('modal');
@@ -531,6 +566,36 @@ class TranslationService {
     });
   }
 
+  // Update user management tab
+  updateUserManagementTab() {
+    // Update add user button
+    const addUserBtn = document.querySelector('#users .action-bar button');
+    if (addUserBtn && (addUserBtn.textContent.includes('Add User') || addUserBtn.textContent.includes('Agregar Usuario'))) {
+      addUserBtn.textContent = this.t('addUser');
+    }
+    
+    // Update user labels
+    const userLabels = document.querySelectorAll('.user-label');
+    userLabels.forEach(label => {
+      if (label.textContent.includes('User Name') || label.textContent.includes('Nombre de Usuario')) {
+        label.textContent = this.t('userName');
+      } else if (label.textContent.includes('User Role') || label.textContent.includes('Rol de Usuario')) {
+        label.textContent = this.t('userRole');
+      }
+    });
+  }
+
+  // Update sidebar navigation
+  updateSidebarNavigation() {
+    const sidebarTabs = document.querySelectorAll('.sidebar-nav .tab');
+    sidebarTabs.forEach(tab => {
+      const translationKey = tab.getAttribute('data-i18n');
+      if (translationKey) {
+        tab.textContent = this.t(translationKey);
+      }
+    });
+  }
+
   // Update configuration tab
   updateConfigurationTab() {
     // Update form generation settings section
@@ -590,6 +655,10 @@ class TranslationService {
       modalTitle.textContent = this.t('addSystemTitle');
     } else if (titleText.includes('Edit System') || titleText.includes('Editar Sistema')) {
       modalTitle.textContent = this.t('editSystemTitle');
+    } else if (titleText.includes('Add User') || titleText.includes('Agregar Usuario')) {
+      modalTitle.textContent = this.t('addUser');
+    } else if (titleText.includes('Edit User') || titleText.includes('Editar Usuario')) {
+      modalTitle.textContent = this.t('editUser');
     }
     
     // Update form labels in modal
@@ -606,11 +675,17 @@ class TranslationService {
         label.textContent = this.t('systemName');
       } else if (labelText === 'Category' || labelText === 'Categoría') {
         label.textContent = this.t('category');
+      } else if (labelText.includes('Username') || labelText.includes('Nombre de Usuario')) {
+        label.textContent = this.t('username');
+      } else if (labelText.includes('Password') || labelText.includes('Contraseña')) {
+        label.textContent = this.t('password');
+      } else if (labelText.includes('Role') || labelText.includes('Rol')) {
+        label.textContent = this.t('role');
       }
     });
     
     // Update placeholders
-    const inputs = modalBody.querySelectorAll('input[type="text"]');
+    const inputs = modalBody.querySelectorAll('input[type="text"], input[type="password"]');
     inputs.forEach(input => {
       const placeholder = input.getAttribute('placeholder');
       if (placeholder && placeholder.includes('Enter department name') || placeholder && placeholder.includes('Ingrese el nombre del departamento')) {
@@ -621,6 +696,8 @@ class TranslationService {
         input.setAttribute('placeholder', this.t('enterCategoryName'));
       } else if (placeholder && placeholder.includes('Enter system name') || placeholder && placeholder.includes('Ingrese el nombre del sistema')) {
         input.setAttribute('placeholder', this.t('enterSystemName'));
+      } else if (placeholder && placeholder.includes('Leave blank') || placeholder && placeholder.includes('Dejar en blanco')) {
+        input.setAttribute('placeholder', this.t('leaveBlank'));
       }
     });
     
@@ -644,6 +721,10 @@ class TranslationService {
         button.textContent = this.t('addSystemBtn');
       } else if (buttonText.includes('Update System') || buttonText.includes('Actualizar Sistema')) {
         button.textContent = this.t('updateSystemBtn');
+      } else if (buttonText.includes('Add User') || buttonText.includes('Agregar Usuario')) {
+        button.textContent = this.t('addUser');
+      } else if (buttonText.includes('Update User') || buttonText.includes('Actualizar Usuario')) {
+        button.textContent = this.t('updateUser');
       }
     });
     

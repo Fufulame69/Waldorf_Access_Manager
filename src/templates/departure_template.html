@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Technologies - Employee Separation Checklist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- Master Sizing Controls --- */
+            /* Adjusted for the Separation Checklist layout to fit a letter page */
+            --text-main-title: 1.6rem;
+            --text-sub-title: 1.8rem;
+            --text-section-header: 0.8rem;
+            --text-section-subtitle: 0.65rem;
+            --text-label: 0.6rem;
+            --text-field: 0.65rem;
+            --text-checkbox: 0.65rem;
+            --text-footer: 0.6rem;
+
+            --space-0-5: 0.1rem;   /* 1.6px */
+            --space-1: 0.15rem;  /* 2.4px */
+            --space-1-5: 0.25rem; /* 4px */
+            --space-2: 0.4rem;   /* 6.4px */
+            --space-3: 0.6rem;  /* 9.6px */
+            --space-4: 0.8rem;  /* 12.8px */
+
+            --checkbox-size: 0.8rem; /* 12.8px */
+
+            /* Print Scaling */
+            --print-scale: 0.98;
+            --print-margin: 0.4in;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e5e7eb; /* gray-200 */
+        }
+
+        .form-container {
+            width: 8.5in;
+            height: 11in;
+            box-sizing: border-box;
+        }
+
+        .data-field {
+            border-bottom: 1px solid black;
+            padding-bottom: var(--space-0-5);
+            font-family: monospace;
+            font-size: var(--text-field);
+            text-align: center;
+        }
+        
+        .section-header {
+            background-color: #22d3ee; /* cyan-400 */
+            padding: var(--space-1-5);
+            border-top: 2px solid black;
+            border-bottom: 2px solid black;
+        }
+
+        /* Print-specific styles */
+        @page {
+            size: letter;
+            margin: var(--print-margin);
+        }
+
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .form-container {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                transform: scale(var(--print-scale));
+                transform-origin: top left;
+            }
+            .section-header {
+                background-color: #22d3ee !important;
+            }
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- Main container for the form -->
+    <div class="form-container mx-auto bg-white p-6 border-2 border-black">
+
+        <!-- Header -->
+        <header class="text-center mb-2">
+            <h1 class="font-bold" style="font-size: var(--text-main-title);">Information Technologies</h1>
+            <h2 class="font-bold" style="font-size: var(--text-sub-title);">Employee Separation Checklist</h2>
+        </header>
+
+        <!-- Instructions -->
+        <p class="text-justify" style="font-size: var(--text-section-subtitle); margin-bottom: var(--space-2);">
+            Management must process terminations promptly and ensure all terminated team members are terminated in PeopleSoft and their access removed or disabled from all other systems immediately (IE: within 14 days from the date of termination). Involuntary terminations should be processed immediately.
+        </p>
+
+        <!-- Employee Information Section -->
+        <section>
+            <div class="section-header">
+                <h3 class="font-bold" style="font-size: var(--text-section-header);">Employee Information: <span class="font-normal" style="font-size: var(--text-section-subtitle);">The form should be completed in its entirety and signed by the supervisor for processing.</span></h3>
+            </div>
+            <div class="grid grid-cols-10 gap-x-6 gap-y-2" style="padding: var(--space-2) var(--space-1); font-size: var(--text-label);">
+                <!-- Row 1 -->
+                <label class="font-bold col-span-2">Employee's Name</label>
+                <div class="data-field col-span-2">0</div>
+                <label class="font-bold col-span-2 text-right">Term / Separation Date</label>
+                <div class="data-field col-span-2"></div>
+                <label class="font-bold text-right">Today's Date</label>
+                <div class="data-field col-span-2"></div>
+                <!-- Row 2 -->
+                <label class="font-bold col-span-2">IDM User.</label>
+                <div class="data-field col-span-2">0</div>
+                <label class="font-bold col-span-2 text-right">Hotel Name and Location #</label>
+                <div class="data-field col-span-4 font-bold">Hilton Bogota Corferias</div>
+                <!-- Row 3 -->
+                <label class="font-bold col-span-2">Employee's Position Title</label>
+                <div class="data-field col-span-2 font-bold">Asistente de Sistemas</div>
+                <label class="font-bold col-span-2 text-right">Manager's Name and Phone #</label>
+                <div class="data-field col-span-2">#N/A</div>
+                <div class="data-field col-span-2">+57 1 443 4400</div>
+                <!-- Row 4 -->
+                <label class="font-bold col-span-2">Department Name and #</label>
+                <div class="data-field col-span-2">0</div>
+                <label class="font-bold col-span-2 text-right">Manager's Signature</label>
+                <div class="data-field col-span-4"></div>
+            </div>
+        </section>
+
+        <!-- Separation Information -->
+        <section>
+            <div class="section-header">
+                <h3 class="font-bold" style="font-size: var(--text-section-header);">Separation Information: <span class="font-normal" style="font-size: var(--text-section-subtitle);">List the date access should be removed and date processed.</span></h3>
+            </div>
+            <div class="grid grid-cols-2 gap-x-6" style="padding: var(--space-2) var(--space-1); font-size: var(--text-label);">
+                <div class="flex items-end"><label class="font-bold mr-2">Date to Remove Access:</label><div class="data-field flex-grow"></div></div>
+                <div class="flex items-end"><label class="font-bold mr-2">Date to be Processed:</label><div class="data-field flex-grow"></div></div>
+            </div>
+        </section>
+
+        <!-- Network & Applications Access -->
+        <section>
+            <div class="section-header">
+                <h3 class="font-bold" style="font-size: var(--text-section-header);">Network & Applications Access: <span class="font-normal" style="font-size: var(--text-section-subtitle);">Mark the appropriate systems / access to be terminated. Note: Management must process terminations and ensure <b>all</b> current network and computer applications access and accounts are terminated or removed immediately upon termination (IE: within 14 days). This includes PeopleSoft, OnQ Operations Audit, OnQ PMS, etc.</span></h3>
+            </div>
+            <div class="grid grid-cols-3 gap-x-8" style="padding: var(--space-2) var(--space-1); font-size: var(--text-checkbox);">
+                <!-- Column 1 -->
+                <div>
+                    <h4 class="font-bold underline">Financial Systems</h4>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Sun System</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">PMQA</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">PROPLAN</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Operation Audit</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">BlackLine</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Datalink</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Facturación Elec.</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Siesa Nomina</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Scap5k-Reloj</div></div>
+                    <h4 class="font-bold underline mt-2">POS System</h4>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Simphony</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Other</div></div>
+                </div>
+                 <!-- Column 2 -->
+                <div>
+                    <h4 class="font-bold underline">Front System</h4>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Opera PMS</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Salto Key System</div></div>
+                    <h4 class="font-bold underline mt-2">Reservation System</h4>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">OnQ R&I</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Horizon</div></div>
+                    <h4 class="font-bold underline mt-2">Miscelaneos System</h4>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Hotsos</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Logical Signage</div></div>
+                    <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Delphi fdc</div></div>
+                </div>
+                <!-- Column 3 -->
+                <div class="flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-bold underline">IDM Acces</h4>
+                        <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">OnQ ID</div></div>
+                        <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Email</div></div>
+                        <div class="flex items-center mt-1"><input type="checkbox" style="width:var(--checkbox-size); height:var(--checkbox-size);" class="mr-2"><div class="flex-1 border-b border-black">Local Network</div></div>
+                    </div>
+                     <!-- Empty space to push IDM to the bottom if needed, but current alignment is better -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Observations & Equipment -->
+        <section class="grid grid-cols-2">
+            <!-- Observations -->
+            <div>
+                <div class="section-header border-r-2 border-black">
+                     <h3 class="font-bold" style="font-size: var(--text-section-header);">Observations</h3>
+                </div>
+                <div class="border-r-2 border-black" style="height: 5.5rem;"></div>
+            </div>
+            <!-- Equipment -->
+            <div>
+                <div class="section-header">
+                     <h3 class="font-bold" style="font-size: var(--text-section-header);">Equipment: <span class="font-normal" style="font-size: var(--text-section-subtitle);">Management must verify and securely obtain all company equipment prior to employee's termination date.</span></h3>
+                </div>
+                <div class="p-2 space-y-3" style="font-size: var(--text-label);">
+                     <div class="flex items-end"><label class="font-bold mr-2 w-24">Laptop / Desktop:</label><div class="data-field flex-grow"></div></div>
+                     <div class="flex items-end"><label class="font-bold mr-2 w-24">Cell Phone:</label><div class="data-field flex-grow"></div></div>
+                     <div class="flex items-end"><label class="font-bold mr-2 w-24">Other:</label><div class="data-field flex-grow"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- For IT / Management Use -->
+        <section>
+             <div class="section-header">
+                <h3 class="font-bold" style="font-size: var(--text-section-header);">For IT / Management Use: <span class="font-normal" style="font-size: var(--text-section-subtitle);">All completed forms must be signed and maintained for subsequent audit verification.</span></h3>
+            </div>
+            <div class="space-y-2" style="padding: var(--space-3) var(--space-1); font-size: var(--text-label);">
+                <div class="grid grid-cols-12 gap-x-4">
+                    <label class="font-bold col-span-3">Security access removed by:</label>
+                    <div class="data-field col-span-5">LUIS MIGUEL GONZALEZ</div>
+                    <label class="font-bold col-span-1 text-right">Date:</label>
+                    <div class="data-field col-span-1"></div>
+                    <label class="font-bold col-span-1 text-right">Time:</label>
+                    <div class="data-field col-span-1">10:25:58 AM</div>
+                </div>
+                <div class="grid grid-cols-12 gap-x-4">
+                    <label class="font-bold col-span-3">Workstation collected or reassigned by:</label>
+                    <div class="data-field col-span-5">LUIS MIGUEL GONZALEZ</div>
+                    <label class="font-bold col-span-1 text-right">Date:</label>
+                    <div class="data-field col-span-1"></div>
+                    <label class="font-bold col-span-1 text-right">Time:</label>
+                    <div class="data-field col-span-1">10:25:58 AM</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer Instructions -->
+        <footer class="border-t-2 border-black pt-2 text-justify">
+             <p style="font-size: var(--text-footer);">
+                Any business emergencies requiring exceptions must be approved in writing and for a specified period of time by the Director of Finance (or designee) and copied to the regional finance representative. The documented approval must be maintained for subsequent audit verification.
+             </p>
+        </footer>
+
+    </div>
+</body>
+</html>

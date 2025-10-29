@@ -10,6 +10,40 @@ let currentUser = null;
 let currentDepartment = null;
 let currentPosition = null;
 
+// Sidebar Module Configuration - Change the order here to reorder sidebar items
+const sidebarModules = [
+  {
+    id: 'departments',
+    translationKey: 'departmentsAndPositions',
+    icon: '',
+    permission: null // Always visible
+  },
+  {
+    id: 'systems',
+    translationKey: 'systemsManagement',
+    icon: '',
+    permission: ['manageSystems', 'manageCategories']
+  },
+  {
+    id: 'formGenerator',
+    translationKey: 'formGenerator',
+    icon: '',
+    permission: 'generateForms'
+  },
+  {
+    id: 'users',
+    translationKey: 'userManagement',
+    icon: '',
+    permission: 'manageUsers'
+  },
+  {
+    id: 'configuration',
+    translationKey: 'configuration',
+    icon: '',
+    permission: 'viewConfigurations'
+  }
+];
+
 // Load data from Firebase
 async function loadData() {
   try {
@@ -1208,15 +1242,20 @@ function renderUserManagement() {
 
     container.innerHTML = `
         <div class="action-bar">
-            <h2>${t('userManagement')}</h2>
             <button class="btn btn-primary" onclick="openModal('addUser')">${t('addUser')}</button>
         </div>
         <div class="user-list">
             ${(data.users || []).map(user => `
                 <div class="user-item">
                     <div class="user-info">
-                        <span class="user-name">${user.username}</span>
-                        <span class="user-role">${user.role}</span>
+                        <div class="user-detail">
+                            <span class="user-label">${t('userName')}:</span>
+                            <span class="user-value">${user.username}</span>
+                        </div>
+                        <div class="user-detail">
+                            <span class="user-label">${t('userRole')}:</span>
+                            <span class="user-value">${user.role}</span>
+                        </div>
                     </div>
                     <div class="user-actions">
                         <button class="icon-btn" onclick="editUser('${user.username}')" title="${t('edit')}">✏️</button>
@@ -1226,6 +1265,9 @@ function renderUserManagement() {
             `).join('')}
         </div>
     `;
+    
+    // Update translations after rendering
+    translationService.updateUI();
 }
 
 // CRUD Operations - Users
@@ -1244,6 +1286,7 @@ async function addUser() {
         await loadData();
         closeModal();
         renderUserManagement();
+        translationService.updateUI();
     } else {
         alert(result.error);
     }
@@ -1265,6 +1308,7 @@ async function updateUser(username) {
         await loadData();
         closeModal();
         renderUserManagement();
+        translationService.updateUI();
     } else {
         alert(result.error);
     }
@@ -1276,7 +1320,31 @@ async function deleteUser(username) {
         data.users = data.users.filter(u => u.username !== username);
         await saveData();
         renderUserManagement();
+        translationService.updateUI();
     }
+}
+
+// Render sidebar navigation based on configuration
+function renderSidebarNavigation() {
+    const sidebarNav = document.getElementById('sidebarNav');
+    if (!sidebarNav) return;
+    
+    sidebarNav.innerHTML = sidebarModules.map(module => {
+        // Check if user has permission for this module
+        if (module.permission && !Array.isArray(module.permission) && !hasPermission(module.permission)) {
+            return '';
+        }
+        
+        // Check if user has any of the required permissions (for arrays)
+        if (Array.isArray(module.permission) && !module.permission.some(perm => hasPermission(perm))) {
+            return '';
+        }
+        
+        // Set first module as active by default
+        const isActive = module.id === 'departments' ? 'active' : '';
+        
+        return `<button class="tab ${isActive}" onclick="switchTab('${module.id}')" data-i18n="${module.translationKey}">${t(module.translationKey)}</button>`;
+    }).join('');
 }
 
 // Initialize on load
@@ -1288,19 +1356,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelector('.sidebar').style.display = 'flex';
         document.querySelector('.content').style.display = 'block';
 
-        // Hide tabs based on roles
-        if (!hasPermission('manageSystems') && !hasPermission('manageCategories')) {
-            document.querySelector('.tab[onclick*="systems"]').style.display = 'none';
-        }
-        if (!hasPermission('generateForms')) {
-            document.querySelector('.tab[onclick*="formGenerator"]').style.display = 'none';
-        }
-        if (!hasPermission('viewConfigurations')) {
-            document.querySelector('.tab[onclick*="configuration"]').style.display = 'none';
-        }
-        if (!hasPermission('manageUsers')) {
-            document.querySelector('.tab[onclick*="users"]').style.display = 'none';
-        }
+        // Render sidebar navigation based on configuration
+        renderSidebarNavigation();
 
         renderDepartments();
     }
