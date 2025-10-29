@@ -26,12 +26,6 @@ const sidebarModules = [
     permission: ['manageSystems', 'manageCategories']
   },
   {
-    id: 'formGenerator',
-    translationKey: 'formGenerator',
-    icon: '',
-    permission: 'generateForms'
-  },
-  {
     id: 'staffManagement',
     translationKey: 'staffManagement',
     icon: '',
@@ -635,6 +629,32 @@ function openModal(type, param) {
         updateStaffPositionDropdown(staff.position);
       }, 100);
       break;
+
+    case 'generateDepartureForm':
+      title.textContent = t('generateDepartureForm');
+      const staffOptions = (data.staffMembers || []).map(staff => `<option value="${staff.id}">${staff.name} (${staff.department} - ${staff.position})</option>`).join('');
+      body.innerHTML = `
+        <div class="form-group">
+          <label>${t('selectEmployee')}</label>
+          <select id="departureStaffId">
+            <option value="">${t('selectEmployee')}</option>
+            ${staffOptions}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>${t('departureDate')}</label>
+          <input type="date" id="departureDate" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <button class="btn btn-primary" onclick="generateDepartureForm()">${t('generate')}</button>
+        <div id="formOutput" style="display: none;">
+          <h3>${t('generatedForm')}</h3>
+          <div class="form-actions">
+            <button class="btn btn-success" onclick="openGeneratedDeparture()">${t('openDepartureForm')}</button>
+          </div>
+          <div id="formStatus"></div>
+        </div>
+      `;
+      break;
   }
 
   modal.classList.add('active');
@@ -1203,6 +1223,55 @@ async function openEmployeeFolder() {
   }
 }
 
+async function generateDepartureForm() {
+  try {
+    const staffId = document.getElementById('departureStaffId').value;
+    const departureDate = document.getElementById('departureDate').value;
+
+    if (!staffId || !departureDate) {
+      await window.electronAPI.showAlertDialog(t('pleaseFillRequiredFields'));
+      return;
+    }
+
+    const staffMember = data.staffMembers.find(s => s.id === staffId);
+    if (!staffMember) {
+      await window.electronAPI.showAlertDialog(t('staffMemberNotFound'));
+      return;
+    }
+
+    const userData = {
+      ...staffMember,
+      departureDate
+    };
+
+    const statusDiv = document.getElementById('formStatus');
+    statusDiv.innerHTML = `<p class="text-blue-600">${t('generatingForm')}</p>`;
+    document.getElementById('formOutput').style.display = 'block';
+
+    const result = await window.electronAPI.generateDepartureForm(userData);
+
+    if (result.success) {
+      statusDiv.innerHTML = `<p class="text-green-600">${t('formGeneratedSuccessfully')}</p>`;
+      window.lastGeneratedDeparture = result.departureFilename;
+      document.querySelector('#formOutput .form-actions').style.display = 'block';
+    } else {
+      statusDiv.innerHTML = `<p class="text-red-600">${t('errorGeneratingForm', { error: result.error })}</p>`;
+    }
+  } catch (error) {
+    console.error('Error generating departure form:', error);
+    const statusDiv = document.getElementById('formStatus');
+    statusDiv.innerHTML = `<p class="text-red-600">${t('errorGeneratingForm', { error: error.message })}</p>`;
+  }
+}
+
+async function openGeneratedDeparture() {
+  if (window.lastGeneratedDeparture) {
+    await window.electronAPI.openGeneratedFile(window.lastGeneratedDeparture);
+  } else {
+    await window.electronAPI.showAlertDialog(t('noFormGeneratedYet'));
+  }
+}
+
 
 // Breadcrumb
 function updateBreadcrumb(items) {
@@ -1317,7 +1386,11 @@ function renderStaffManagement() {
                 <label for="searchStaff">${t('search')}:</label>
                 <input type="text" id="searchStaff" placeholder="${t('searchByName')}" onkeyup="filterStaff()">
             </div>
-            <button class="btn btn-primary" onclick="openModal('addStaff')">${t('addStaff')}</button>
+            <div class="button-group">
+                <button class="btn btn-primary btn-sm" onclick="openModal('addStaff')">${t('addStaff')}</button>
+                <button class="btn btn-success btn-sm" onclick="openModal('generateForm')">${t('generateForm')}</button>
+                <button class="btn btn-secondary btn-sm" onclick="openModal('generateDepartureForm')">${t('generateDepartureForm')}</button>
+            </div>
         </div>
         <div class="staff-table-container">
             <table class="staff-table">

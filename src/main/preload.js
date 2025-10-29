@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Form generation operations
   generateForm: (userData, options) => ipcRenderer.invoke('generate-form', userData, options),
+  generateDepartureForm: (userData) => ipcRenderer.invoke('generate-departure-form', userData),
   getGeneratedForms: () => ipcRenderer.invoke('get-generated-forms'),
   openGeneratedFile: (filename) => ipcRenderer.invoke('open-generated-file', filename),
   openEmployeeFolder: (employeeName) => ipcRenderer.invoke('open-employee-folder', employeeName),

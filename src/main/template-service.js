@@ -10,6 +10,7 @@ class TemplateService {
   constructor() {
     this.templatePath = path.join(__dirname, '../templates/solicitud_template.html');
     this.checklistTemplatePath = path.join(__dirname, '../templates/checklist_template.html');
+    this.departureTemplatePath = path.join(__dirname, '../templates/departure_template.html');
     this.pdfConverter = new PDFConverterService();
     this.cleanupService = new CleanupService();
   }
@@ -21,7 +22,17 @@ class TemplateService {
    */
   async readTemplate(templateType = 'solicitud') {
     try {
-      const templatePath = templateType === 'checklist' ? this.checklistTemplatePath : this.templatePath;
+      let templatePath;
+      switch (templateType) {
+        case 'checklist':
+          templatePath = this.checklistTemplatePath;
+          break;
+        case 'departure':
+          templatePath = this.departureTemplatePath;
+          break;
+        default:
+          templatePath = this.templatePath;
+      }
       return await fs.readFile(templatePath, 'utf8');
     } catch (error) {
       console.error('Error reading template:', error);
@@ -257,6 +268,13 @@ class TemplateService {
       template = template.replace('id="posicion"', `id="posicion" value="${userData.position || ''}"`);
       template = template.replace('id="departamento"', `id="departamento" value="${userData.department || ''}"`);
       template = template.replace('id="fecha_ingreso"', `id="fecha_ingreso" value="${userData.startDate || ''}"`);
+    } else if (templateType === 'departure') {
+      template = template.replace('<div class="data-field col-span-2">0</div>', `<div class="data-field col-span-2">${userData.name || ''}</div>`);
+      template = template.replace('<label class="font-bold col-span-2 text-right">Term / Separation Date</label>\n                <div class="data-field col-span-2"></div>', `<label class="font-bold col-span-2 text-right">Term / Separation Date</label>\n                <div class="data-field col-span-2">${userData.departureDate || ''}</div>`);
+      template = template.replace('<label class="font-bold text-right">Today\'s Date</label>\n                <div class="data-field col-span-2"></div>', `<label class="font-bold text-right">Today\'s Date</label>\n                <div class="data-field col-span-2">${new Date().toLocaleDateString()}</div>`);
+      template = template.replace('<label class="font-bold col-span-2">IDM User.</label>\n                <div class="data-field col-span-2">0</div>', `<label class="font-bold col-span-2">IDM User.</label>\n                <div class="data-field col-span-2">${userData.idmLogin || ''}</div>`);
+      template = template.replace('<label class="font-bold col-span-2">Employee\'s Position Title</label>\n                <div class="data-field col-span-2 font-bold">Asistente de Sistemas</div>', `<label class="font-bold col-span-2">Employee\'s Position Title</label>\n                <div class="data-field col-span-2 font-bold">${userData.position || ''}</div>`);
+      template = template.replace('<label class="font-bold col-span-2">Department Name and #</label>\n                <div class="data-field col-span-2">0</div>', `<label class="font-bold col-span-2">Department Name and #</label>\n                <div class="data-field col-span-2">${userData.department || ''}</div>`);
     } else {
       // Generate dynamic system sections with optional filtering
       const dynamicSections = this.generateDynamicSystemSections(
@@ -448,6 +466,57 @@ class TemplateService {
     } catch (error) {
       console.error('Error generating form:', error);
       throw new Error(`Failed to generate form: ${error.message}`);
+    }
+  }
+
+  async generateDepartureForm(data, userData, outputDir = './generated-forms') {
+    try {
+      await fs.mkdir(outputDir, { recursive: true });
+
+      const sanitizedName = (userData.name || 'unknown').replace(/[^a-zA-Z0-9]/g, '_');
+      const employeeFolder = path.join(outputDir, sanitizedName);
+      await fs.mkdir(employeeFolder, { recursive: true });
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileExtension = '.pdf';
+      const departureBaseFilename = `departure_${timestamp}`;
+      const departureFilename = `${departureBaseFilename}${fileExtension}`;
+      const departureFilePath = path.join(employeeFolder, departureFilename);
+
+      let departureContent = await this.hydrateTemplate(data, userData, { templateType: 'departure' });
+
+      const logoPath = path.resolve(__dirname, '../../assets/waldorf_logo.png');
+      const logoBase64 = await this.imageToBase64(logoPath);
+      departureContent = departureContent.replace(
+        '../assets/waldorf_logo.png',
+        `data:image/png;base64,${logoBase64}`
+      );
+
+      await this.pdfConverter.convertHTMLToPDF(departureContent, departureFilePath, {
+        format: 'Letter',
+        printBackground: true,
+        margin: {
+          top: '0.3cm',
+          right: '0.3cm',
+          bottom: '0.3cm',
+          left: '0.3cm'
+        }
+      });
+
+      const departureHtmlFilePath = path.join(employeeFolder, `${departureBaseFilename}.html`);
+      await fs.writeFile(departureHtmlFilePath, departureContent, 'utf8');
+
+      this.cleanupService.cleanupAfterPDFGeneration(departureFilePath, {
+        delay: 3000,
+        deleteIndex: false
+      });
+
+      console.log(`PDF departure form generated successfully: ${departureFilePath}`);
+
+      return departureFilePath;
+    } catch (error) {
+      console.error('Error generating departure form:', error);
+      throw new Error(`Failed to generate departure form: ${error.message}`);
     }
   }
 

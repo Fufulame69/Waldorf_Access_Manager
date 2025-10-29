@@ -148,8 +148,23 @@ ipcMain.handle('generate-form', async (event, userData, options = {}) => {
   }
 });
 
-
-// IPC handler for opening generated files
+// IPC handler for generating departure forms
+ipcMain.handle('generate-departure-form', async (event, userData) => {
+  try {
+    const data = await getDatabase();
+    const departureFilename = await templateService.generateDepartureForm(data, userData, './generated-forms');
+    return {
+      success: true,
+      departureFilename: path.basename(departureFilename)
+    };
+  } catch (error) {
+    console.error('Error generating departure form:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
 ipcMain.handle('open-generated-file', async (event, filename) => {
   try {
     const filePath = path.join(process.cwd(), 'generated-forms', filename);
